@@ -1,0 +1,7 @@
+# Homework list — one line per assignment:
+#   YYYY-MM-DD | Class | Assignment
+# Example:
+#   2026-10-28 | Pre-Calculus 11 | Worksheet 3.2
+# Classes: Pre-Calculus 11, Music Composition and Production 11, Bible 11,
+#          Life Science 11, Humanities 11, Active Living PE 11
+# Delete a line when the work is handed in. Lines starting with # are ignored.

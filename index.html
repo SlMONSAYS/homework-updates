@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simon's Homework</title>
+<style>
+  :root {
+    --bg: #f6f6f4;
+    --text: #1d1d1f;
+    --muted: #6b6b70;
+    --card: #ffffff;
+    --border: #e2e2e0;
+    --red: #c62828;
+    --red-bg: #fdecec;
+    --yellow: #8a6200;
+    --yellow-bg: #fff6d6;
+    --pink: #a3245e;
+    --pink-bg: #fde7f1;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #151517;
+      --text: #ececee;
+      --muted: #9a9aa0;
+      --card: #1f1f22;
+      --border: #333338;
+      --red: #ff8a80;
+      --red-bg: #3a1c1c;
+      --yellow: #ffd666;
+      --yellow-bg: #382e12;
+      --pink: #ff9cc8;
+      --pink-bg: #3a1a2a;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 16px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  main { max-width: 640px; margin: 0 auto; padding: 24px 16px 48px; }
+  h1 { font-size: 1.6rem; margin: 0 0 4px; }
+  .asof { color: var(--muted); margin: 0 0 20px; }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-left-width: 6px;
+    border-radius: 12px;
+    padding: 16px 18px;
+    margin-bottom: 16px;
+  }
+  .card h2 { font-size: 1.15rem; margin: 0 0 8px; }
+  .overdue { border-left-color: var(--red); }
+  .overdue h2 { color: var(--red); }
+  .week { border-left-color: var(--yellow); }
+  .week h2 { color: var(--yellow); }
+  h3 { font-size: 0.95rem; color: var(--muted); margin: 14px 0 4px; font-weight: 600; }
+  ul { list-style: none; margin: 0; padding: 0; }
+  li {
+    display: flex; justify-content: space-between; gap: 12px;
+    padding: 6px 0; border-top: 1px solid var(--border);
+  }
+  li:first-child { border-top: none; }
+  .when { white-space: nowrap; font-size: 0.9rem; font-weight: 600; padding: 1px 8px; border-radius: 6px; align-self: flex-start; }
+  .overdue .when { color: var(--red); background: var(--red-bg); }
+  .week .when { color: var(--yellow); background: var(--yellow-bg); }
+  .empty { color: var(--muted); margin: 4px 0; }
+  .later { color: var(--muted); margin: 8px 0 0; }
+  .note {
+    background: var(--pink-bg); color: var(--pink);
+    border-radius: 12px; padding: 12px 16px; margin-bottom: 16px;
+  }
+  .note code { white-space: pre-wrap; word-break: break-word; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Simon's Homework</h1>
+  <p class="asof" id="asof"></p>
+  <div id="note"></div>
+  <section class="card overdue">
+    <h2>Overdue</h2>
+    <div id="overdue"><p class="empty">Loading…</p></div>
+  </section>
+  <section class="card week">
+    <h2>Due this week</h2>
+    <div id="week"><p class="empty">Loading…</p></div>
+    <p class="later" id="later"></p>
+  </section>
+</main>
+<script>
+  const CLASSES = [
+    "Pre-Calculus 11",
+    "Music Composition and Production 11",
+    "Bible 11",
+    "Life Science 11",
+    "Humanities 11",
+    "Active Living PE 11"
+  ];
+  const DAY = 24 * 60 * 60 * 1000;
+
+  function startOfToday() {
+    const d = new Date();
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  }
+
+  // Parses "YYYY-MM-DD" as a local date; returns null if it isn't a real date.
+  function parseDate(s) {
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s);
+    if (!m) return null;
+    const d = new Date(+m[1], +m[2] - 1, +m[3]);
+    if (d.getFullYear() !== +m[1] || d.getMonth() !== +m[2] - 1 || d.getDate() !== +m[3]) return null;
+    return d;
+  }
+
+  function parse(text) {
+    const items = [], bad = [];
+    text.split(/\r?\n/).forEach((raw, i) => {
+      const line = raw.trim();
+      if (!line || line.startsWith("#")) return;
+      const parts = line.split("|").map(p => p.trim());
+      const due = parts.length >= 3 ? parseDate(parts[0]) : null;
+      const title = parts.slice(2).join(" | ");
+      if (!due || !parts[1] || !title) { bad.push({ n: i + 1, line }); return; }
+      // Match class names case-insensitively so small typos in capitalisation still group correctly.
+      const known = CLASSES.find(c => c.toLowerCase() === parts[1].toLowerCase());
+      items.push({ due, cls: known || parts[1], title });
+    });
+    return { items, bad };
+  }
+
+  function classRank(cls) {
+    const i = CLASSES.indexOf(cls);
+    return i === -1 ? CLASSES.length : i;
+  }
+
+  function fmt(d) {
+    return d.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
+  }
+
+  function el(tag, cls, text) {
+    const e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text != null) e.textContent = text;
+    return e;
+  }
+
+  function renderList(container, items, label, emptyText) {
+    container.replaceChildren();
+    if (!items.length) { container.append(el("p", "empty", emptyText)); return; }
+    items.sort((a, b) => classRank(a.cls) - classRank(b.cls) || a.cls.localeCompare(b.cls) || a.due - b.due);
+    let ul, current;
+    for (const it of items) {
+      if (it.cls !== current) {
+        current = it.cls;
+        container.append(el("h3", null, current));
+        ul = el("ul");
+        container.append(ul);
+      }
+      const li = el("li");
+      li.append(el("span", null, it.title), el("span", "when", label(it)));
+      ul.append(li);
+    }
+  }
+
+  function render(text) {
+    const today = startOfToday();
+    // This coming Sunday (today if it's already Sunday).
+    const sunday = new Date(today.getTime() + ((7 - today.getDay()) % 7) * DAY);
+    const { items, bad } = parse(text);
+
+    const overdue = items.filter(it => it.due < today);
+    const week = items.filter(it => it.due >= today && it.due <= sunday);
+    const later = items.filter(it => it.due > sunday).length;
+
+    document.getElementById("asof").textContent =
+      "As of " + today.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric", year: "numeric" });
+
+    renderList(document.getElementById("overdue"), overdue, it => {
+      const n = Math.round((today - it.due) / DAY);
+      return n === 1 ? "1 day late" : n + " days late";
+    }, "Nothing overdue.");
+
+    renderList(document.getElementById("week"), week, it =>
+      it.due.getTime() === today.getTime() ? "Today" : fmt(it.due), "Nothing due this week.");
+
+    document.getElementById("later").textContent =
+      later ? later + " more due after this week" : "";
+
+    const note = document.getElementById("note");
+    note.replaceChildren();
+    if (bad.length) {
+      const box = el("div", "note");
+      box.append(el("strong", null, bad.length === 1
+        ? "One line in homework.txt couldn't be read:"
+        : bad.length + " lines in homework.txt couldn't be read:"));
+      for (const b of bad) {
+        const p = el("div");
+        p.append("Line " + b.n + ": ", el("code", null, b.line));
+        box.append(p);
+      }
+      note.append(box);
+    }
+  }
+
+  fetch("homework.txt", { cache: "no-store" })
+    .then(r => { if (!r.ok) throw new Error(r.status); return r.text(); })
+    .then(render)
+    .catch(() => {
+      document.getElementById("overdue").replaceChildren(el("p", "empty", "Couldn't load homework.txt."));
+      document.getElementById("week").replaceChildren(el("p", "empty", "Couldn't load homework.txt."));
+    });
+</script>
+</body>
+</html>
