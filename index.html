@@ -536,21 +536,20 @@
     what.focus();
   }
 
-  function renderList(container, items, label, allClasses = true) {
+  function renderList(container, items, label, emptyText = "Nothing") {
     container.replaceChildren();
     items.sort((a, b) => a.due - b.due);
-    // Every class gets a heading, even with nothing due; unknown class names go at the end.
+    // Only classes with something in this list get a heading, in class order; unknown class names go at the end.
     const extra = [...new Set(items.map(it => it.cls).filter(c => !CLASSES.includes(c)))].sort();
     for (const cls of [...CLASSES, ...extra]) {
       const mine = items.filter(it => it.cls === cls);
-      if (!mine.length && !allClasses) continue;
+      if (!mine.length) continue;
       container.append(el("h3", null, cls));
-      if (!mine.length) { container.append(el("p", "empty", "Nothing")); continue; }
       const ul = el("ul");
       for (const it of mine) ul.append(itemRow(it, label));
       container.append(ul);
     }
-    if (!allClasses && !container.children.length) container.append(el("p", "empty", "Nothing"));
+    if (!container.children.length) container.append(el("p", "empty", emptyText));
   }
 
   function render(text) {
@@ -569,16 +568,16 @@
       if (n < 7) return n === 1 ? "1 day late" : n + " days late";
       const w = Math.floor(n / 7);
       return w === 1 ? "1 week late" : w + " weeks late";
-    });
+    }, "Nothing overdue.");
     renderList($("week"), week, it =>
-      +it.due === +today ? "Today" : +it.due === +sunday ? "This week" : fmt(it.due));
+      +it.due === +today ? "Today" : +it.due === +sunday ? "This week" : fmt(it.due), "Nothing due this week.");
 
     $("later").textContent = !ed && later.length ? later.length + " more due after this week" : "";
     $("upcoming-card").hidden = !ed;
     $("done-card").hidden = !ed || !done.length;
     if (ed) {
-      renderList($("upcoming"), later, it => +it.due === +addDays(sunday, 7) ? "Next week" : fmt(it.due), false);
-      renderList($("done"), done, it => fmt(it.due), false);
+      renderList($("upcoming"), later, it => +it.due === +addDays(sunday, 7) ? "Next week" : fmt(it.due));
+      renderList($("done"), done, it => fmt(it.due));
       $("done-title").textContent = "Handed in (" + done.length + ")";
       $("clear-done").onclick = () => {
         const lines = done.map(d => d.line);
