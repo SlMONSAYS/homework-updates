@@ -133,7 +133,8 @@
   .row-edit .actions { grid-column: 1 / -1; display: flex; gap: 8px; }
   footer { margin-top: 28px; display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; color: var(--muted); }
   .setup p { margin: 0 0 10px; font-size: 0.95rem; }
-  .setup .row { display: flex; gap: 8px; }
+  .setup .row { display: flex; gap: 8px; margin-bottom: 10px; }
+  .setup .stack { display: grid; gap: 8px; margin-bottom: 10px; }
   .setup a { color: var(--accent); }
   .err { color: var(--red); }
   .toast {
@@ -179,11 +180,23 @@
     <button class="link clear" id="clear-done" type="button">Delete all handed-in items</button>
   </details>
 
+  <section class="card adder setup ui" id="login" hidden>
+    <h2>Log in</h2>
+    <form class="row" id="login-form">
+      <input type="password" id="password" placeholder="Password" aria-label="Password" autocomplete="current-password" required>
+      <button class="btn" type="submit">Log in</button>
+    </form>
+    <p class="err" id="login-err" hidden></p>
+    <p><button class="link" id="setup-link" type="button">Set up a new password</button></p>
+  </section>
+
   <section class="card adder setup ui" id="setup" hidden>
-    <h2>Edit on this device</h2>
-    <p>Paste your GitHub key for the homework-updates repo. It's saved only in this browser, so your parents' devices stay view-only.</p>
-    <form class="row" id="setup-form">
-      <input type="password" id="token" placeholder="github_pat_…" aria-label="GitHub key" autocomplete="off" required>
+    <h2>Set up a password</h2>
+    <p>Paste your GitHub key for the homework-updates repo and choose a password. The key is locked with your password before it's saved, so on any device you'll only need the password.</p>
+    <form class="stack" id="setup-form">
+      <input type="password" id="token" placeholder="GitHub key (github_pat_…)" aria-label="GitHub key" autocomplete="off" required>
+      <input type="password" id="new-password" placeholder="New password (at least 12 characters)" aria-label="New password" autocomplete="new-password" minlength="12" required>
+      <input type="password" id="new-password2" placeholder="Type the password again" aria-label="Type the password again" autocomplete="new-password" required>
       <button class="btn" type="submit">Save</button>
     </form>
     <p class="err" id="setup-err" hidden></p>
@@ -191,8 +204,8 @@
 
   <footer class="ui">
     <span id="status"></span>
-    <button class="link" id="edit-link" type="button">Edit</button>
-    <button class="link" id="stop-link" type="button" hidden>Stop editing on this device</button>
+    <button class="link" id="login-link" type="button">Log in</button>
+    <button class="link" id="logout-link" type="button" hidden>Log out</button>
   </footer>
 </main>
 <div class="toast ui" id="toast" hidden><span id="toast-text"></span><button class="link" id="toast-undo" type="button">Undo</button></div>
@@ -207,7 +220,8 @@
     "Psychology 12"
   ];
   const DAY = 24 * 60 * 60 * 1000;
-  const API = "https://api.github.com/repos/SlMONSAYS/homework-updates/contents/homework.txt";
+  const REPO_API = "https://api.github.com/repos/SlMONSAYS/homework-updates/contents/";
+  const LOCK_FILE = "login-lock.json";   // the GitHub key, locked with Simon's password
   const DONE = "# done | ";    // handed-in items are kept as comment lines, so the plain view ignores them
   const TOKEN_KEY = "homework-token";
 
@@ -281,20 +295,20 @@
   let ops = [];         // edits not yet saved
   let saving = false;
 
-  function b64decode(s) {
-    return new TextDecoder().decode(Uint8Array.from(atob(s.replace(/\s/g, "")), c => c.charCodeAt(0)));
-  }
-  function b64encode(s) {
+  function bytesToB64(bytes) {
     let bin = "";
-    for (const b of new TextEncoder().encode(s)) bin += String.fromCharCode(b);
+    for (const b of bytes) bin += String.fromCharCode(b);
     return btoa(bin);
   }
+  const b64ToBytes = s => Uint8Array.from(atob(s.replace(/\s/g, "")), c => c.charCodeAt(0));
+  const b64decode = s => new TextDecoder().decode(b64ToBytes(s));
+  const b64encode = s => bytesToB64(new TextEncoder().encode(s));
   function headers() {
     return { Authorization: "Bearer " + token, Accept: "application/vnd.github+json" };
   }
 
-  async function loadFromGitHub() {
-    const r = await fetch(API + "?ref=main", { headers: headers(), cache: "no-store" });
+  async function loadFromGitHub(file = "homework.txt") {
+    const r = await fetch(REPO_API + file + "?ref=main", { headers: headers(), cache: "no-store" });
     if (!r.ok) throw new Error(r.status);
     const j = await r.json();
     return { text: b64decode(j.content), sha: j.sha };
@@ -326,7 +340,7 @@
       while (ops.length) {
         const n = ops.length;
         const text = currentText();
-        const r = await fetch(API, {
+        const r = await fetch(REPO_API + "homework.txt", {
           method: "PUT",
           headers: { ...headers(), "Content-Type": "application/json" },
           body: JSON.stringify({ message: "Update homework", content: b64encode(text), sha: base.sha, branch: "main" })
@@ -558,35 +572,127 @@
       base = null;
       return e;
     }
+    $("login").hidden = true;
     $("setup").hidden = true;
-    $("edit-link").hidden = true;
-    $("stop-link").hidden = false;
+    $("login-link").hidden = true;
+    $("logout-link").hidden = false;
     setupAdder();
     render(currentText());
     return null;
   }
 
-  $("edit-link").onclick = () => {
-    $("setup").hidden = false;
-    $("token").focus();
+  // ---------- Password login ----------
+  // The GitHub key is encrypted with the password (PBKDF2 + AES-GCM) and kept in the repo,
+  // so any device can log in with just the password.
+  async function passwordKey(password, salt, iterations) {
+    const raw = await crypto.subtle.importKey("raw", new TextEncoder().encode(password), "PBKDF2", false, ["deriveKey"]);
+    return crypto.subtle.deriveKey({ name: "PBKDF2", salt, iterations, hash: "SHA-256" },
+      raw, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]);
+  }
+
+  async function lockToken(tok, password) {
+    const salt = crypto.getRandomValues(new Uint8Array(16));
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const iterations = 600000;
+    const key = await passwordKey(password, salt, iterations);
+    const data = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, new TextEncoder().encode(tok));
+    return { iterations, salt: bytesToB64(salt), iv: bytesToB64(iv), data: bytesToB64(new Uint8Array(data)) };
+  }
+
+  async function unlockToken(lock, password) {
+    const key = await passwordKey(password, b64ToBytes(lock.salt), lock.iterations);
+    const data = await crypto.subtle.decrypt({ name: "AES-GCM", iv: b64ToBytes(lock.iv) }, key, b64ToBytes(lock.data));
+    return new TextDecoder().decode(data);
+  }
+
+  async function getLock() {
+    const r = await fetch(LOCK_FILE, { cache: "no-store" });
+    if (r.status === 404) return null;
+    if (!r.ok) throw new Error(r.status);
+    return r.json();
+  }
+
+  async function saveLock(lock) {
+    let sha;
+    try { sha = (await loadFromGitHub(LOCK_FILE)).sha; } catch (e) {}
+    const r = await fetch(REPO_API + LOCK_FILE, {
+      method: "PUT",
+      headers: { ...headers(), "Content-Type": "application/json" },
+      body: JSON.stringify({ message: "Update login password", content: b64encode(JSON.stringify(lock, null, 2) + "\n"), sha, branch: "main" })
+    });
+    if (!r.ok) throw new Error(r.status);
+  }
+
+  function showPanel(id) {
+    $("login").hidden = id !== "login";
+    $("setup").hidden = id !== "setup";
+    const panel = $(id);
+    panel.scrollIntoView({ behavior: "smooth", block: "center" });
+    panel.querySelector("input").focus({ preventScroll: true });
+  }
+
+  function showErr(id, text) {
+    $(id).textContent = text;
+    $(id).hidden = !text;
+  }
+
+  function remember() {
+    try { localStorage.setItem(TOKEN_KEY, token); } catch (e) {}
+  }
+
+  $("login-link").onclick = () => showPanel("login");
+  $("setup-link").onclick = () => showPanel("setup");
+
+  $("login-form").onsubmit = async e => {
+    e.preventDefault();
+    showErr("login-err", "");
+    let lock;
+    try { lock = await getLock(); } catch (err) { showErr("login-err", "Couldn't reach the site. Check your connection."); return; }
+    if (!lock) {
+      showPanel("setup");
+      showErr("setup-err", "No password has been set up yet (or it was saved less than a minute ago).");
+      return;
+    }
+    try {
+      token = await unlockToken(lock, $("password").value);
+    } catch (err) {
+      showErr("login-err", "Wrong password.");
+      return;
+    }
+    if (await startEditing()) {
+      token = null;
+      showErr("login-err", "Password is right, but the GitHub key no longer works (it may have expired). Use \"Set up a new password\" with a new key.");
+      return;
+    }
+    remember();
+    $("password").value = "";
   };
 
   $("setup-form").onsubmit = async e => {
     e.preventDefault();
+    showErr("setup-err", "");
+    const pw = $("new-password").value;
+    if (pw !== $("new-password2").value) { showErr("setup-err", "The two passwords don't match."); return; }
     token = $("token").value.trim();
-    $("setup-err").hidden = true;
     const err = await startEditing();
     if (err) {
       token = null;
-      $("setup-err").textContent = "That key didn't work (" + err.message + "). Check that it has access to the homework-updates repo with Contents: Read and write.";
-      $("setup-err").hidden = false;
+      showErr("setup-err", "That GitHub key didn't work (" + err.message + "). Check that it has access to the homework-updates repo with Contents: Read and write.");
       return;
     }
-    try { localStorage.setItem(TOKEN_KEY, token); } catch (e) {}
-    $("token").value = "";
+    try {
+      await saveLock(await lockToken(token, pw));
+    } catch (err) {
+      showErr("setup-err", "You're logged in here, but the password couldn't be saved (" + err.message + "). Try again.");
+      $("setup").hidden = false;
+      return;
+    }
+    remember();
+    for (const id of ["token", "new-password", "new-password2"]) $(id).value = "";
+    setStatus("Password saved ✓");
   };
 
-  $("stop-link").onclick = () => {
+  $("logout-link").onclick = () => {
     try { localStorage.removeItem(TOKEN_KEY); } catch (e) {}
     location.reload();
   };
