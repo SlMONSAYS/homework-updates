@@ -43,6 +43,11 @@
     background-repeat: no-repeat;
   }
   main { max-width: 600px; margin: 0 auto; padding: 40px 16px 96px; }
+  /* Overdue and Due this week sit side by side on wider screens, stacked on phones. */
+  @media (min-width: 820px) {
+    main { max-width: 1040px; }
+    .columns { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; }
+  }
   h1 { font-weight: 600; font-size: 1.9rem; line-height: 1.2; margin: 0 0 24px; padding-bottom: 12px; border-bottom: 1px solid var(--border); color: var(--text); }
   .card {
     background: var(--card);
@@ -168,6 +173,7 @@
     </form>
   </section>
 
+  <div class="columns">
   <section class="card overdue">
     <h2>Overdue</h2>
     <div id="overdue"><p class="empty">Loading…</p></div>
@@ -177,6 +183,7 @@
     <div id="week"><p class="empty">Loading…</p></div>
     <p class="later" id="later"></p>
   </section>
+  </div>
   <section class="card upcoming" id="upcoming-card" hidden>
     <h2>Later</h2>
     <div id="upcoming"></div>
