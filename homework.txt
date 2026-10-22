@@ -8,3 +8,4 @@
 # Handed-in items checked off on the website are kept as '# done | ...' lines.
 2026-10-08 | Anatomy and Physiology 12 | Katina's Bad Day
 2026-10-25 | Humanities 12 | Take WSQ Notes On 12 Videos
+2026-10-25 | Humanities 12 | Animal Farm Workbook
