@@ -96,6 +96,13 @@
     background: var(--field); border: 1px solid var(--border); border-radius: 8px;
     padding: 8px 10px; min-height: 40px; width: 100%;
   }
+  select {
+    appearance: none; -webkit-appearance: none; padding-right: 36px; cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%238a857b' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 14px center; background-size: 12px 8px;
+  }
+  .when-pick { display: grid; gap: 8px; }
+  .add-grid > select, .row-edit > select { align-self: start; }
   input:focus, select:focus, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
   .btn {
     font-family: "Inter", system-ui, sans-serif; font-size: 0.9rem; font-weight: 600;
@@ -156,7 +163,7 @@
     <form class="add-grid ui" id="add-form" autocomplete="off">
       <input class="what" type="text" id="add-title" placeholder="What's the assignment?" aria-label="Assignment" required>
       <select id="add-class" aria-label="Class"></select>
-      <input type="date" id="add-date" aria-label="Due date" required>
+      <div id="add-when"></div>
       <button class="btn" type="submit">Add</button>
     </form>
   </section>
@@ -445,7 +452,58 @@
     return s;
   }
 
-  // Tap an assignment to change its name, class or date in place.
+  // Calendar-day arithmetic (safe across daylight-saving changes).
+  function addDays(d, n) {
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
+  }
+
+  // This coming Sunday (today if it's already Sunday).
+  function thisSunday() {
+    const today = startOfToday();
+    return addDays(today, (7 - today.getDay()) % 7);
+  }
+
+  // "When is it due?" picker: weeks instead of dates, with an exact date as a fallback.
+  // Choices are turned into dates so homework.txt keeps its format.
+  function whenPicker(due) {
+    const wrap = el("div", "when-pick");
+    const sel = el("select");
+    sel.setAttribute("aria-label", "When is it due");
+    for (const [v, t] of [["0", "Due this week"], ["-1", "Due next week"], ["1", "1 week overdue"],
+        ["2", "2 weeks overdue"], ["3", "3 weeks overdue"], ["4", "4 weeks overdue"], ["date", "Pick a date…"]]) {
+      const o = el("option", null, t);
+      o.value = v;
+      sel.append(o);
+    }
+    const date = el("input");
+    date.type = "date";
+    date.setAttribute("aria-label", "Due date");
+    const sync = () => {
+      date.hidden = sel.value !== "date";
+      if (!date.hidden && !date.value) date.value = isoDate(thisSunday());
+    };
+    sel.onchange = sync;
+    if (due) {
+      const sun = thisSunday(), days = Math.round((startOfToday() - due) / DAY);
+      if (+due === +sun) sel.value = "0";
+      else if (+due === +addDays(sun, 7)) sel.value = "-1";
+      else if (days > 0 && days % 7 === 0 && days <= 28) sel.value = String(days / 7);
+      else { sel.value = "date"; date.value = isoDate(due); }
+    }
+    sync();
+    wrap.append(sel, date);
+    return {
+      el: wrap,
+      value() {
+        if (sel.value === "date") return date.value;
+        const n = +sel.value;
+        // This/next week = that week's Sunday; N weeks overdue = N weeks ago today.
+        return isoDate(addDays(n <= 0 ? thisSunday() : startOfToday(), -n * 7));
+      }
+    };
+  }
+
+  // Tap an assignment to change its name, class or due week in place.
   function openEditor(li, it) {
     const isDone = it.line.startsWith(DONE.trim());
     const form = el("form", "row-edit ui");
@@ -453,18 +511,16 @@
     what.type = "text"; what.value = it.title; what.required = true;
     what.setAttribute("aria-label", "Assignment");
     const cls = classSelect(it.cls);
-    const date = el("input");
-    date.type = "date"; date.value = isoDate(it.due); date.required = true;
-    date.setAttribute("aria-label", "Due date");
+    const when = whenPicker(it.due);
     const actions = el("div", "actions");
     const ok = el("button", "btn", "Save"); ok.type = "submit";
     const cancel = el("button", "btn quiet", "Cancel"); cancel.type = "button";
     actions.append(ok, cancel);
-    form.append(what, cls, date, actions);
+    form.append(what, cls, when.el, actions);
     form.onsubmit = e => {
       e.preventDefault();
-      if (!what.value.trim() || !date.value) return;
-      const line = (isDone ? DONE : "") + makeLine(date.value, cls.value, what.value);
+      if (!what.value.trim() || !when.value()) return;
+      const line = (isDone ? DONE : "") + makeLine(when.value(), cls.value, what.value);
       if (line !== it.line) edit(replaceLine(it.line, line)); else render(currentText());
     };
     cancel.onclick = () => render(currentText());
@@ -492,8 +548,7 @@
 
   function render(text) {
     const today = startOfToday();
-    // This coming Sunday (today if it's already Sunday).
-    const sunday = new Date(today.getTime() + ((7 - today.getDay()) % 7) * DAY);
+    const sunday = thisSunday();
     const { items, done, bad } = parse(text);
     const ed = editing();
     document.body.classList.toggle("editing", ed);
@@ -504,16 +559,18 @@
 
     renderList($("overdue"), overdue, it => {
       const n = Math.round((today - it.due) / DAY);
-      return n === 1 ? "1 day late" : n + " days late";
+      if (n < 7) return n === 1 ? "1 day late" : n + " days late";
+      const w = Math.floor(n / 7);
+      return w === 1 ? "1 week late" : w + " weeks late";
     });
     renderList($("week"), week, it =>
-      it.due.getTime() === today.getTime() ? "Today" : fmt(it.due));
+      +it.due === +today ? "Today" : +it.due === +sunday ? "This week" : fmt(it.due));
 
     $("later").textContent = !ed && later.length ? later.length + " more due after this week" : "";
     $("upcoming-card").hidden = !ed;
     $("done-card").hidden = !ed || !done.length;
     if (ed) {
-      renderList($("upcoming"), later, it => fmt(it.due), false);
+      renderList($("upcoming"), later, it => +it.due === +addDays(sunday, 7) ? "Next week" : fmt(it.due), false);
       renderList($("done"), done, it => fmt(it.due), false);
       $("done-title").textContent = "Handed in (" + done.length + ")";
       $("clear-done").onclick = () => {
@@ -541,18 +598,20 @@
   }
 
   // ---------- Add form ----------
+  let addWhen = null;
   function setupAdder() {
     $("adder").hidden = false;
     const sel = $("add-class");
     if (!sel.options.length) {
       for (const c of CLASSES) { const o = el("option", null, c); o.value = c; sel.append(o); }
-      $("add-date").value = isoDate(new Date(startOfToday().getTime() + DAY));
+      addWhen = whenPicker();
+      $("add-when").replaceWith(addWhen.el);
     }
     $("add-form").onsubmit = e => {
       e.preventDefault();
       const title = $("add-title").value.trim();
-      if (!title || !$("add-date").value) return;
-      edit(addLine(makeLine($("add-date").value, sel.value, title)));
+      if (!title || !addWhen.value()) return;
+      edit(addLine(makeLine(addWhen.value(), sel.value, title)));
       // Like adding list items in Keep: clear the text and stay ready for the next one.
       $("add-title").value = "";
       $("add-title").focus();
