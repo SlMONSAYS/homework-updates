@@ -619,6 +619,19 @@
   }
 
   // ---------- Start ----------
+  // Read the file straight from GitHub so changes show up instantly; the published copy
+  // can lag a minute behind while the site rebuilds. Fall back to it if GitHub says no
+  // (it allows 60 of these an hour per network).
+  async function loadPublic() {
+    try {
+      const r = await fetch(REPO_API + "homework.txt?ref=main", { headers: { Accept: "application/vnd.github.raw+json" }, cache: "no-store" });
+      if (r.ok) return await r.text();
+    } catch (e) {}
+    const r = await fetch("homework.txt", { cache: "no-store" });
+    if (!r.ok) throw new Error(r.status);
+    return r.text();
+  }
+
   function showLoadError() {
     $("overdue").replaceChildren(el("p", "empty", "Couldn't load homework.txt."));
     $("week").replaceChildren(el("p", "empty", "Couldn't load homework.txt."));
@@ -761,10 +774,7 @@
   (async () => {
     if (token && !(await startEditing())) return;
     if (token) setStatus("Couldn't open editing. Showing the published list.", true);
-    fetch("homework.txt", { cache: "no-store" })
-      .then(r => { if (!r.ok) throw new Error(r.status); return r.text(); })
-      .then(render)
-      .catch(showLoadError);
+    loadPublic().then(render).catch(showLoadError);
   })();
 </script>
 </body>
