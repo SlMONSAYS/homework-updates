@@ -67,9 +67,15 @@
   .week h2 { color: var(--yellow); }
   .upcoming, .done, .adder { border-left-color: var(--accent); }
   .upcoming h2, .done h2, .adder h2 { color: var(--accent); }
-  h3 { font-weight: 600; font-size: 1.05rem; color: var(--text); margin: 12px 0 0; padding-top: 8px; border-top: 1px solid var(--border); }
-  h2 + div > h3:first-child { border-top: none; padding-top: 0; }
-  ul { list-style: none; margin: 0; padding: 0; }
+  /* Class names are small uppercase labels; their assignments sit indented under a guide line,
+     so the two never read as the same kind of text. */
+  h3 {
+    font-family: "Inter", system-ui, sans-serif; font-size: 0.78rem; font-weight: 600;
+    letter-spacing: 0.1em; text-transform: uppercase; color: var(--text);
+    margin: 22px 0 6px;
+  }
+  h2 + div > h3:first-child { margin-top: 10px; }
+  ul { list-style: none; margin: 0 0 0 2px; padding: 0 0 0 14px; border-left: 2px solid rgba(255, 255, 255, 0.14); }
   li {
     display: flex; align-items: flex-start; gap: 10px;
     padding: 7px 0; border-top: 1px solid var(--border);
