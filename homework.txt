@@ -5,3 +5,9 @@
 # Classes: Pre-Calculus 11, Music Composition and Production 11, Bible 11,
 #          Life Science 11, Humanities 11, Active Living PE 11
 # Delete a line when the work is handed in. Lines starting with # are ignored.
+2026-10-19 | Humanities 11 | TEST overdue essay draft
+2026-10-21 | Pre-Calculus 11 | TEST overdue worksheet 3.1
+2026-10-22 | Life Science 11 | TEST due today lab report
+2026-10-25 | Pre-Calculus 11 | TEST due Sunday quiz corrections
+2026-10-30 | Bible 11 | TEST later reflection
+next friday | Bible 11 | TEST malformed line
