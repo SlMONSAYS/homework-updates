@@ -4,73 +4,86 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Simon's Homework</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500&family=Lora:wght@400;600&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
 <style>
+  /* Forest-at-night palette, matching simon's little corner */
   :root {
-    --bg: #f6f6f4;
-    --text: #1d1d1f;
-    --muted: #6b6b70;
-    --card: #ffffff;
-    --border: #e2e2e0;
-    --red: #c62828;
-    --red-bg: #fdecec;
-    --yellow: #8a6200;
-    --yellow-bg: #fff6d6;
-    --pink: #a3245e;
-    --pink-bg: #fde7f1;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #151517;
-      --text: #ececee;
-      --muted: #9a9aa0;
-      --card: #1f1f22;
-      --border: #333338;
-      --red: #ff8a80;
-      --red-bg: #3a1c1c;
-      --yellow: #ffd666;
-      --yellow-bg: #382e12;
-      --pink: #ff9cc8;
-      --pink-bg: #3a1a2a;
-    }
+    --bg: #151815;
+    --text: #e4dfd6;       /* warm cream */
+    --muted: #8a857b;
+    --accent: #7ba576;     /* muted forest green */
+    --wood: #a08b72;
+    --border: rgba(255, 255, 255, 0.08);
+    --card: rgba(22, 25, 22, 0.55);
+    --red: #e08a7c;        /* ember red: overdue */
+    --red-bg: rgba(224, 138, 124, 0.14);
+    --yellow: #e3c06b;     /* lamplight amber: due this week */
+    --yellow-bg: rgba(227, 192, 107, 0.14);
+    --pink: #e8a3c4;
+    --pink-bg: rgba(232, 163, 196, 0.12);
+    color-scheme: dark;
   }
   * { box-sizing: border-box; }
   body {
     margin: 0;
-    background: var(--bg);
+    min-height: 100vh;
     color: var(--text);
-    font: 16px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font: 17px/1.6 "Lora", Georgia, serif;
+    background-color: var(--bg);
+    /* Dark watercolour wash: forest green, slate blue, a hint of lamplight */
+    background-image:
+      radial-gradient(ellipse 80% 60% at 15% 20%, rgba(45, 72, 50, 0.35), rgba(45, 72, 50, 0.12) 40%, transparent 70%),
+      radial-gradient(ellipse 70% 80% at 80% 35%, rgba(42, 55, 68, 0.30), rgba(42, 55, 68, 0.10) 45%, transparent 75%),
+      radial-gradient(ellipse 90% 50% at 50% 90%, rgba(35, 60, 40, 0.40), rgba(35, 60, 40, 0.15) 35%, transparent 65%),
+      radial-gradient(ellipse 50% 45% at 70% 10%, rgba(38, 62, 60, 0.25), rgba(38, 62, 60, 0.08) 50%, transparent 80%),
+      radial-gradient(ellipse 30% 25% at 25% 85%, rgba(70, 65, 48, 0.18), rgba(70, 65, 48, 0.05) 50%, transparent 80%);
+    background-attachment: fixed;
+    background-repeat: no-repeat;
   }
-  main { max-width: 640px; margin: 0 auto; padding: 24px 16px 48px; }
-  h1 { font-size: 1.6rem; margin: 0 0 4px; }
-  .asof { color: var(--muted); margin: 0 0 20px; }
+  main { max-width: 600px; margin: 0 auto; padding: 40px 16px 56px; }
+  h1 { font-family: "Caveat", cursive; font-weight: 500; font-size: 2.4rem; line-height: 1.1; margin: 0 0 4px; color: var(--text); }
+  .asof {
+    font-family: "Inter", system-ui, sans-serif; font-weight: 300; font-size: 0.75rem;
+    letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted);
+    margin: 0 0 24px; padding-bottom: 12px; border-bottom: 1px solid var(--border);
+  }
   .card {
     background: var(--card);
-    border: 1px solid var(--border);
-    border-left-width: 6px;
+    -webkit-backdrop-filter: blur(24px) saturate(1.1);
+    backdrop-filter: blur(24px) saturate(1.1);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-left: 4px solid;
     border-radius: 12px;
-    padding: 16px 18px;
-    margin-bottom: 16px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+    padding: 18px 20px;
+    margin-bottom: 18px;
   }
-  .card h2 { font-size: 1.15rem; margin: 0 0 8px; }
+  .card h2 { font-size: 1.2rem; font-weight: 600; margin: 0 0 6px; }
   .overdue { border-left-color: var(--red); }
   .overdue h2 { color: var(--red); }
   .week { border-left-color: var(--yellow); }
   .week h2 { color: var(--yellow); }
-  h3 { font-size: 0.95rem; color: var(--muted); margin: 14px 0 4px; font-weight: 600; }
+  h3 { font-family: "Caveat", cursive; font-weight: 500; font-size: 1.35rem; color: var(--accent); margin: 14px 0 0; }
   ul { list-style: none; margin: 0; padding: 0; }
   li {
     display: flex; justify-content: space-between; gap: 12px;
-    padding: 6px 0; border-top: 1px solid var(--border);
+    padding: 7px 0; border-top: 1px solid var(--border);
   }
   li:first-child { border-top: none; }
-  .when { white-space: nowrap; font-size: 0.9rem; font-weight: 600; padding: 1px 8px; border-radius: 6px; align-self: flex-start; }
+  .when {
+    font-family: "Inter", system-ui, sans-serif; white-space: nowrap; font-size: 0.8rem; font-weight: 600;
+    padding: 2px 9px; border-radius: 6px; align-self: flex-start; margin-top: 2px;
+  }
   .overdue .when { color: var(--red); background: var(--red-bg); }
   .week .when { color: var(--yellow); background: var(--yellow-bg); }
-  .empty { color: var(--muted); margin: 4px 0; }
-  .later { color: var(--muted); margin: 8px 0 0; }
+  .empty { color: var(--muted); font-style: italic; margin: 4px 0; }
+  .later { color: var(--wood); font-size: 0.95rem; margin: 10px 0 0; }
+  .later:empty { display: none; }
   .note {
     background: var(--pink-bg); color: var(--pink);
-    border-radius: 12px; padding: 12px 16px; margin-bottom: 16px;
+    border: 1px solid rgba(232, 163, 196, 0.25);
+    border-radius: 12px; padding: 12px 16px; margin-bottom: 18px; font-size: 0.95rem;
   }
   .note code { white-space: pre-wrap; word-break: break-word; }
 </style>
@@ -92,12 +105,13 @@
 </main>
 <script>
   const CLASSES = [
-    "Pre-Calculus 11",
-    "Music Composition and Production 11",
-    "Bible 11",
-    "Life Science 11",
-    "Humanities 11",
-    "Active Living PE 11"
+    "Humanities 12",
+    "Math 11",
+    "Anatomy and Physiology 12",
+    "Chemistry 11",
+    "Careers 12",
+    "PE 12",
+    "Psychology 12"
   ];
   const DAY = 24 * 60 * 60 * 1000;
 
