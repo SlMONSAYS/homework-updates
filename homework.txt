@@ -5,7 +5,7 @@
 # Classes: Humanities 12, Math 11, Anatomy and Physiology 12, Chemistry 11,
 #          Careers 12, PE 12, Psychology 12, Miscellaneous
 # Delete a line when the work is handed in. Lines starting with # are ignored.
-# Handed-in items checked off on the website are kept as '# done | ...' lines.
+# Items checked off on the website become '# done <date> <time> | ...' lines (the Submitted list).
 2026-10-08 | Anatomy and Physiology 12 | Katina's Bad Day
 2026-10-25 | Humanities 12 | Take WSQ Notes On 12 Videos
 2026-10-25 | Humanities 12 | Animal Farm Workbook

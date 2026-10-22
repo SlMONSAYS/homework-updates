@@ -65,8 +65,12 @@
   .overdue h2 { color: var(--red); }
   .week { border-left-color: var(--yellow); }
   .week h2 { color: var(--yellow); }
-  .upcoming, .done, .adder { border-left-color: var(--accent); }
-  .upcoming h2, .done h2, .adder h2 { color: var(--accent); }
+  .upcoming, .adder { border-left-color: var(--accent); }
+  .upcoming h2, .adder h2 { color: var(--accent); }
+  /* Submitted log sits apart from the to-do cards, in weathered-wood brown. */
+  .done { border-left-color: var(--wood); margin-top: 40px; }
+  .done h2 { color: var(--wood); }
+  .done-intro { color: var(--muted); font-size: 0.95rem; margin: 0 0 4px; }
   /* Class names are small uppercase labels; their assignments sit indented under a guide line,
      so the two never read as the same kind of text. */
   h3 {
@@ -88,7 +92,9 @@
   }
   .overdue .when { color: var(--red); background: var(--red-bg); }
   .week .when { color: var(--yellow); background: var(--yellow-bg); }
-  .upcoming .when, .done .when { color: var(--muted); background: var(--field); }
+  .upcoming .when { color: var(--muted); background: var(--field); }
+  .done .when { color: var(--accent); background: rgba(123, 165, 118, 0.14); }
+  .done .when.late { color: var(--red); background: var(--red-bg); }
   .empty { color: var(--muted); font-size: 0.95rem; margin: 0 0 2px; }
   .note {
     background: var(--pink-bg); color: var(--pink);
@@ -137,13 +143,10 @@
     background: none; color: var(--muted); font-size: 1.3rem; line-height: 1; cursor: pointer;
   }
   .x:hover { background: var(--field); color: var(--text); }
-  .done li .title { text-decoration: line-through; color: var(--muted); }
-  .done summary { cursor: pointer; list-style: none; }
-  .done summary::-webkit-details-marker { display: none; }
-  .done summary h2 { display: inline; }
-  .done summary::before { content: "▸ "; color: var(--accent); }
-  .done[open] summary::before { content: "▾ "; }
-  .done .clear { margin-top: 10px; }
+  .main { flex: 1; min-width: 0; }
+  .main .title { display: block; }
+  .stamp { display: block; font-style: italic; color: var(--muted); font-size: 0.92rem; }
+  .done .clear { margin-top: 12px; }
   .row-edit { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; padding: 4px 0; }
   .row-edit .what { grid-column: 1 / -1; }
   .row-edit .actions { grid-column: 1 / -1; display: flex; gap: 8px; }
@@ -191,11 +194,12 @@
     <h2>Later</h2>
     <div id="upcoming"></div>
   </section>
-  <details class="card done" id="done-card" hidden>
-    <summary><h2 id="done-title">Handed in</h2></summary>
+  <section class="card done">
+    <h2>Submitted</h2>
+    <p class="done-intro">Checked off as handed in, newest first.</p>
     <div id="done"></div>
-    <button class="link clear" id="clear-done" type="button">Delete all handed-in items</button>
-  </details>
+    <button class="link clear" id="clear-done" type="button" hidden>Clear the submitted list</button>
+  </section>
 
   <section class="card adder setup ui" id="login" hidden>
     <h2>Log in</h2>
@@ -240,10 +244,16 @@
   const DAY = 24 * 60 * 60 * 1000;
   const REPO_API = "https://api.github.com/repos/SlMONSAYS/homework-updates/contents/";
   const LOCK_FILE = "login-lock.json";   // the GitHub key, locked with Simon's password
-  const DONE = "# done | ";    // handed-in items are kept as comment lines, so the plain view ignores them
+  // Handed-in items stay in the file as comment lines with the time they were checked off:
+  //   # done 2026-10-22 15:45 | 2026-10-25 | Math 11 | Worksheet
+  const DONE_RE = /^#\s*done(?:\s+(\d{4}-\d{2}-\d{2})\s+(\d{1,2}):(\d{2}))?\s*\|\s*/;
   const TOKEN_KEY = "homework-token";
 
   const $ = id => document.getElementById(id);
+
+  function startOfDay(d) {
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  }
 
   function startOfToday() {
     const d = new Date();
@@ -277,9 +287,14 @@
     const items = [], done = [], bad = [];
     text.split(/\r?\n/).forEach((raw, i) => {
       const line = raw.trim();
-      if (line.startsWith(DONE.trim())) {
-        const it = parseItem(line.slice(DONE.trim().length).replace(/^\s*\|?\s*/, ""));
-        if (it) done.push({ ...it, line });
+      const m = DONE_RE.exec(line);
+      if (m) {
+        const rest = line.slice(m[0].length);
+        const it = parseItem(rest);
+        if (!it) return;
+        const day = m[1] && parseDate(m[1]);
+        done.push({ ...it, line, rest, prefix: m[0],
+          submitted: day ? new Date(day.getFullYear(), day.getMonth(), day.getDate(), +m[2], +m[3]) : null });
         return;
       }
       if (!line || line.startsWith("#")) return;
@@ -291,6 +306,17 @@
 
   function makeLine(due, cls, title) {
     return due + " | " + cls + " | " + title.replace(/\s+/g, " ").trim();
+  }
+
+  function doneStamp() {
+    const now = new Date();
+    return "# done " + isoDate(now) + " " + String(now.getHours()).padStart(2, "0") + ":" +
+      String(now.getMinutes()).padStart(2, "0") + " | ";
+  }
+
+  function fmtSubmitted(d) {
+    return "Submitted " + d.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" }) +
+      " at " + d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit", hour12: true });
   }
 
   function fmt(d) {
@@ -415,26 +441,30 @@
 
   function itemRow(it, label) {
     const li = el("li");
+    const isDone = !!it.prefix;
+    const tag = el("span", "when", label(it));
+    if (isDone && it.submitted && it.submitted > addDays(it.due, 1)) tag.classList.add("late");
+    const main = el("div", "main");
+    const title = el("span", "title", it.title);
+    main.append(title);
+    if (isDone) main.append(el("span", "stamp", it.submitted ? fmtSubmitted(it.submitted) : "Submitted"));
     if (!editing()) {
-      li.append(el("span", "title", it.title), el("span", "when", label(it)));
+      li.append(main, tag);
       return li;
     }
-    const isDone = it.line.startsWith(DONE.trim());
     const box = el("input", "check");
     box.type = "checkbox";
     box.checked = isDone;
     box.setAttribute("aria-label", (isDone ? "Mark not handed in: " : "Mark handed in: ") + it.title);
     box.onchange = () => {
       if (isDone) {
-        const restored = it.line.slice(DONE.trim().length).replace(/^\s*\|?\s*/, "");
-        edit(replaceLine(it.line, restored));
+        edit(replaceLine(it.line, it.rest));
       } else {
-        const doneLine = DONE + it.line;
+        const doneLine = doneStamp() + it.line;
         edit(replaceLine(it.line, doneLine));
         toast("Handed in: " + it.title, () => edit(replaceLine(doneLine, it.line)));
       }
     };
-    const title = el("span", "title", it.title);
     title.tabIndex = 0;
     title.setAttribute("role", "button");
     title.onclick = () => openEditor(li, it);
@@ -446,7 +476,7 @@
       edit(replaceLine(it.line, null));
       toast("Deleted: " + it.title, () => edit(addLine(it.line)));
     };
-    li.append(box, title, el("span", "when", label(it)), x);
+    li.append(box, main, tag, x);
     return li;
   }
 
@@ -516,7 +546,6 @@
 
   // Tap an assignment to change its name, class or due week in place.
   function openEditor(li, it) {
-    const isDone = it.line.startsWith(DONE.trim());
     const form = el("form", "row-edit ui");
     const what = el("input", "what");
     what.type = "text"; what.value = it.title; what.required = true;
@@ -531,7 +560,7 @@
     form.onsubmit = e => {
       e.preventDefault();
       if (!what.value.trim() || !when.value()) return;
-      const line = (isDone ? DONE : "") + makeLine(when.value(), cls.value, what.value);
+      const line = (it.prefix || "") + makeLine(when.value(), cls.value, what.value);
       if (line !== it.line) edit(replaceLine(it.line, line)); else render(currentText());
     };
     cancel.onclick = () => render(currentText());
@@ -540,9 +569,9 @@
     what.focus();
   }
 
-  function renderList(container, items, label, emptyText = "Nothing") {
+  function renderList(container, items, label, emptyText = "Nothing", order = (a, b) => a.due - b.due) {
     container.replaceChildren();
-    items.sort((a, b) => a.due - b.due);
+    items.sort(order);
     // Only classes with something in this list get a heading, in class order; unknown class names go at the end.
     const extra = [...new Set(items.map(it => it.cls).filter(c => !CLASSES.includes(c)))].sort();
     for (const cls of [...CLASSES, ...extra]) {
@@ -556,6 +585,12 @@
     if (!container.children.length) container.append(el("p", "empty", emptyText));
   }
 
+  function lateLabel(n) {
+    if (n < 7) return n === 1 ? "1 day late" : n + " days late";
+    const w = Math.floor(n / 7);
+    return w === 1 ? "1 week late" : w + " weeks late";
+  }
+
   function render(text) {
     const today = startOfToday();
     const sunday = thisSunday();
@@ -567,24 +602,23 @@
     const week = items.filter(it => it.due >= today && it.due <= sunday);
     const later = items.filter(it => it.due > sunday);
 
-    renderList($("overdue"), overdue, it => {
-      const n = Math.round((today - it.due) / DAY);
-      if (n < 7) return n === 1 ? "1 day late" : n + " days late";
-      const w = Math.floor(n / 7);
-      return w === 1 ? "1 week late" : w + " weeks late";
-    }, "Nothing overdue.");
+    renderList($("overdue"), overdue, it => lateLabel(Math.round((today - it.due) / DAY)), "Nothing overdue.");
     renderList($("week"), week, it =>
       +it.due === +today ? "Today" : +it.due === +sunday ? "This week" : fmt(it.due), "Nothing due this week.");
 
     renderList($("upcoming"), later, it => +it.due === +addDays(sunday, 7) ? "Next week" : fmt(it.due), "Nothing due later.");
-    $("done-card").hidden = !ed || !done.length;
+    // Submitted log: everyone sees it, newest first within each class.
+    renderList($("done"), done, it => {
+      if (!it.submitted) return "Was due " + fmt(it.due);
+      const late = Math.round((startOfDay(it.submitted) - it.due) / DAY);
+      return late <= 0 ? "On time" : lateLabel(late);
+    }, "Nothing submitted yet.", (a, b) => (b.submitted || 0) - (a.submitted || 0));
+    $("clear-done").hidden = !ed || !done.length;
     if (ed) {
-      renderList($("done"), done, it => fmt(it.due));
-      $("done-title").textContent = "Handed in (" + done.length + ")";
       $("clear-done").onclick = () => {
         const lines = done.map(d => d.line);
         edit(ls => ls.filter(l => !lines.includes(l.trim())));
-        toast("Deleted " + lines.length + " handed-in item" + (lines.length === 1 ? "" : "s"),
+        toast("Cleared " + lines.length + " submitted item" + (lines.length === 1 ? "" : "s"),
           () => edit(ls => [...ls, ...lines]));
       };
     }
