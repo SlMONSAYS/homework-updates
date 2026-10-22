@@ -459,6 +459,7 @@
     box.onchange = () => {
       if (isDone) {
         edit(replaceLine(it.line, it.rest));
+        toast("Moved back: " + it.title, () => edit(replaceLine(it.rest, it.line)));
       } else {
         const doneLine = doneStamp() + it.line;
         edit(replaceLine(it.line, doneLine));
@@ -561,7 +562,9 @@
       e.preventDefault();
       if (!what.value.trim() || !when.value()) return;
       const line = (it.prefix || "") + makeLine(when.value(), cls.value, what.value);
-      if (line !== it.line) edit(replaceLine(it.line, line)); else render(currentText());
+      if (line === it.line) { render(currentText()); return; }
+      edit(replaceLine(it.line, line));
+      toast("Saved changes", () => edit(replaceLine(line, it.line)));
     };
     cancel.onclick = () => render(currentText());
     form.onkeydown = e => { if (e.key === "Escape") render(currentText()); };
@@ -653,7 +656,9 @@
       e.preventDefault();
       const title = $("add-title").value.trim();
       if (!title || !addWhen.value()) return;
-      edit(addLine(makeLine(addWhen.value(), sel.value, title)));
+      const line = makeLine(addWhen.value(), sel.value, title);
+      edit(addLine(line));
+      toast("Added: " + title, () => edit(replaceLine(line, null)));
       // Like adding list items in Keep: clear the text and stay ready for the next one.
       $("add-title").value = "";
       $("add-title").focus();
