@@ -16,6 +16,7 @@
     --wood: #a08b72;
     --border: rgba(255, 255, 255, 0.08);
     --card: rgba(22, 25, 22, 0.55);
+    --field: rgba(255, 255, 255, 0.05);
     --red: #e08a7c;        /* ember red: overdue */
     --red-bg: rgba(224, 138, 124, 0.14);
     --yellow: #e3c06b;     /* lamplight amber: due this week */
@@ -41,7 +42,7 @@
     background-attachment: fixed;
     background-repeat: no-repeat;
   }
-  main { max-width: 600px; margin: 0 auto; padding: 40px 16px 56px; }
+  main { max-width: 600px; margin: 0 auto; padding: 40px 16px 96px; }
   h1 { font-weight: 600; font-size: 1.9rem; line-height: 1.2; margin: 0 0 24px; padding-bottom: 12px; border-bottom: 1px solid var(--border); color: var(--text); }
   .card {
     background: var(--card);
@@ -59,20 +60,24 @@
   .overdue h2 { color: var(--red); }
   .week { border-left-color: var(--yellow); }
   .week h2 { color: var(--yellow); }
+  .upcoming, .done, .adder { border-left-color: var(--accent); }
+  .upcoming h2, .done h2, .adder h2 { color: var(--accent); }
   h3 { font-weight: 600; font-size: 1.05rem; color: var(--text); margin: 12px 0 0; padding-top: 8px; border-top: 1px solid var(--border); }
   h2 + div > h3:first-child { border-top: none; padding-top: 0; }
   ul { list-style: none; margin: 0; padding: 0; }
   li {
-    display: flex; justify-content: space-between; gap: 12px;
+    display: flex; align-items: flex-start; gap: 10px;
     padding: 7px 0; border-top: 1px solid var(--border);
   }
   li:first-child { border-top: none; }
+  .title { flex: 1; min-width: 0; overflow-wrap: anywhere; }
   .when {
     font-family: "Inter", system-ui, sans-serif; white-space: nowrap; font-size: 0.8rem; font-weight: 600;
-    padding: 2px 9px; border-radius: 6px; align-self: flex-start; margin-top: 2px;
+    padding: 2px 9px; border-radius: 6px; margin-top: 3px;
   }
   .overdue .when { color: var(--red); background: var(--red-bg); }
   .week .when { color: var(--yellow); background: var(--yellow-bg); }
+  .upcoming .when, .done .when { color: var(--muted); background: var(--field); }
   .empty { color: var(--muted); font-size: 0.95rem; margin: 0 0 2px; }
   .later { color: var(--wood); font-size: 0.95rem; margin: 10px 0 0; }
   .later:empty { display: none; }
@@ -82,12 +87,79 @@
     border-radius: 12px; padding: 12px 16px; margin-bottom: 18px; font-size: 0.95rem;
   }
   .note code { white-space: pre-wrap; word-break: break-word; }
+  [hidden] { display: none !important; }
+
+  /* --- Editing (only shown on Simon's devices) --- */
+  button, input, select { font: inherit; color: inherit; }
+  .ui { font-family: "Inter", system-ui, sans-serif; font-size: 0.9rem; }
+  input[type=text], input[type=password], input[type=date], select {
+    background: var(--field); border: 1px solid var(--border); border-radius: 8px;
+    padding: 8px 10px; min-height: 40px; width: 100%;
+  }
+  input:focus, select:focus, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .btn {
+    font-family: "Inter", system-ui, sans-serif; font-size: 0.9rem; font-weight: 600;
+    background: var(--accent); color: #142014; border: none; border-radius: 8px;
+    padding: 8px 14px; min-height: 40px; cursor: pointer;
+  }
+  .btn.quiet { background: var(--field); color: var(--text); font-weight: 400; }
+  .link { background: none; border: none; padding: 0; color: var(--muted); text-decoration: underline; cursor: pointer; font-family: "Inter", system-ui, sans-serif; font-size: 0.85rem; }
+  .add-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .add-grid .what { grid-column: 1 / -1; }
+  .add-grid .btn { grid-column: 1 / -1; }
+  .check {
+    flex: none; width: 22px; height: 22px; margin: 4px 0 0; cursor: pointer;
+    appearance: none; -webkit-appearance: none;
+    border: 2px solid var(--muted); border-radius: 5px; background: transparent;
+    display: grid; place-content: center;
+  }
+  .check:checked { background: var(--accent); border-color: var(--accent); }
+  .check:checked::after { content: ""; width: 6px; height: 11px; border: solid #142014; border-width: 0 2.5px 2.5px 0; transform: translateY(-1px) rotate(45deg); }
+  .editing .title { cursor: text; }
+  .x {
+    flex: none; width: 30px; height: 30px; margin-top: -1px; border: none; border-radius: 6px;
+    background: none; color: var(--muted); font-size: 1.3rem; line-height: 1; cursor: pointer;
+  }
+  .x:hover { background: var(--field); color: var(--text); }
+  .done li .title { text-decoration: line-through; color: var(--muted); }
+  .done summary { cursor: pointer; list-style: none; }
+  .done summary::-webkit-details-marker { display: none; }
+  .done summary h2 { display: inline; }
+  .done summary::before { content: "▸ "; color: var(--accent); }
+  .done[open] summary::before { content: "▾ "; }
+  .done .clear { margin-top: 10px; }
+  .row-edit { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; padding: 4px 0; }
+  .row-edit .what { grid-column: 1 / -1; }
+  .row-edit .actions { grid-column: 1 / -1; display: flex; gap: 8px; }
+  footer { margin-top: 28px; display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; color: var(--muted); }
+  .setup p { margin: 0 0 10px; font-size: 0.95rem; }
+  .setup .row { display: flex; gap: 8px; }
+  .setup a { color: var(--accent); }
+  .err { color: var(--red); }
+  .toast {
+    position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%);
+    background: #2a2e2a; color: var(--text); border: 1px solid var(--border); border-radius: 10px;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4); padding: 10px 14px;
+    display: flex; gap: 16px; align-items: center; max-width: calc(100% - 32px);
+  }
+  .toast .link { color: var(--accent); font-weight: 600; text-decoration: none; }
 </style>
 </head>
 <body>
 <main>
   <h1>Simon's Homework</h1>
   <div id="note"></div>
+
+  <section class="card adder" id="adder" hidden>
+    <h2>Add assignment</h2>
+    <form class="add-grid ui" id="add-form" autocomplete="off">
+      <input class="what" type="text" id="add-title" placeholder="What's the assignment?" aria-label="Assignment" required>
+      <select id="add-class" aria-label="Class"></select>
+      <input type="date" id="add-date" aria-label="Due date" required>
+      <button class="btn" type="submit">Add</button>
+    </form>
+  </section>
+
   <section class="card overdue">
     <h2>Overdue</h2>
     <div id="overdue"><p class="empty">Loading…</p></div>
@@ -97,7 +169,33 @@
     <div id="week"><p class="empty">Loading…</p></div>
     <p class="later" id="later"></p>
   </section>
+  <section class="card upcoming" id="upcoming-card" hidden>
+    <h2>Later</h2>
+    <div id="upcoming"></div>
+  </section>
+  <details class="card done" id="done-card" hidden>
+    <summary><h2 id="done-title">Handed in</h2></summary>
+    <div id="done"></div>
+    <button class="link clear" id="clear-done" type="button">Delete all handed-in items</button>
+  </details>
+
+  <section class="card adder setup ui" id="setup" hidden>
+    <h2>Edit on this device</h2>
+    <p>Paste your GitHub key for the homework-updates repo. It's saved only in this browser, so your parents' devices stay view-only.</p>
+    <form class="row" id="setup-form">
+      <input type="password" id="token" placeholder="github_pat_…" aria-label="GitHub key" autocomplete="off" required>
+      <button class="btn" type="submit">Save</button>
+    </form>
+    <p class="err" id="setup-err" hidden></p>
+  </section>
+
+  <footer class="ui">
+    <span id="status"></span>
+    <button class="link" id="edit-link" type="button">Edit</button>
+    <button class="link" id="stop-link" type="button" hidden>Stop editing on this device</button>
+  </footer>
 </main>
+<div class="toast ui" id="toast" hidden><span id="toast-text"></span><button class="link" id="toast-undo" type="button">Undo</button></div>
 <script>
   const CLASSES = [
     "Humanities 12",
@@ -109,6 +207,11 @@
     "Psychology 12"
   ];
   const DAY = 24 * 60 * 60 * 1000;
+  const API = "https://api.github.com/repos/SlMONSAYS/homework-updates/contents/homework.txt";
+  const DONE = "# done | ";    // handed-in items are kept as comment lines, so the plain view ignores them
+  const TOKEN_KEY = "homework-token";
+
+  const $ = id => document.getElementById(id);
 
   function startOfToday() {
     const d = new Date();
@@ -124,25 +227,38 @@
     return d;
   }
 
-  function parse(text) {
-    const items = [], bad = [];
-    text.split(/\r?\n/).forEach((raw, i) => {
-      const line = raw.trim();
-      if (!line || line.startsWith("#")) return;
-      const parts = line.split("|").map(p => p.trim());
-      const due = parts.length >= 3 ? parseDate(parts[0]) : null;
-      const title = parts.slice(2).join(" | ");
-      if (!due || !parts[1] || !title) { bad.push({ n: i + 1, line }); return; }
-      // Match class names case-insensitively so small typos in capitalisation still group correctly.
-      const known = CLASSES.find(c => c.toLowerCase() === parts[1].toLowerCase());
-      items.push({ due, cls: known || parts[1], title });
-    });
-    return { items, bad };
+  function isoDate(d) {
+    return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
   }
 
-  function classRank(cls) {
-    const i = CLASSES.indexOf(cls);
-    return i === -1 ? CLASSES.length : i;
+  function parseItem(line) {
+    const parts = line.split("|").map(p => p.trim());
+    const due = parts.length >= 3 ? parseDate(parts[0]) : null;
+    const title = parts.slice(2).join(" | ");
+    if (!due || !parts[1] || !title) return null;
+    // Match class names case-insensitively so small typos in capitalisation still group correctly.
+    const known = CLASSES.find(c => c.toLowerCase() === parts[1].toLowerCase());
+    return { due, cls: known || parts[1], title, line };
+  }
+
+  function parse(text) {
+    const items = [], done = [], bad = [];
+    text.split(/\r?\n/).forEach((raw, i) => {
+      const line = raw.trim();
+      if (line.startsWith(DONE.trim())) {
+        const it = parseItem(line.slice(DONE.trim().length).replace(/^\s*\|?\s*/, ""));
+        if (it) done.push({ ...it, line });
+        return;
+      }
+      if (!line || line.startsWith("#")) return;
+      const it = parseItem(line);
+      if (it) items.push(it); else bad.push({ n: i + 1, line });
+    });
+    return { items, done, bad };
+  }
+
+  function makeLine(due, cls, title) {
+    return due + " | " + cls + " | " + title.replace(/\s+/g, " ").trim();
   }
 
   function fmt(d) {
@@ -156,48 +272,245 @@
     return e;
   }
 
-  function renderList(container, items, label) {
+  // ---------- Saving to GitHub ----------
+  // Edits are small functions over the file's lines. They're applied locally straight away,
+  // then saved in order; if the file changed elsewhere, we reload it and re-apply them.
+  let token = null;
+  try { token = localStorage.getItem(TOKEN_KEY); } catch (e) {}
+  let base = null;      // { text, sha } as last read from / saved to GitHub
+  let ops = [];         // edits not yet saved
+  let saving = false;
+
+  function b64decode(s) {
+    return new TextDecoder().decode(Uint8Array.from(atob(s.replace(/\s/g, "")), c => c.charCodeAt(0)));
+  }
+  function b64encode(s) {
+    let bin = "";
+    for (const b of new TextEncoder().encode(s)) bin += String.fromCharCode(b);
+    return btoa(bin);
+  }
+  function headers() {
+    return { Authorization: "Bearer " + token, Accept: "application/vnd.github+json" };
+  }
+
+  async function loadFromGitHub() {
+    const r = await fetch(API + "?ref=main", { headers: headers(), cache: "no-store" });
+    if (!r.ok) throw new Error(r.status);
+    const j = await r.json();
+    return { text: b64decode(j.content), sha: j.sha };
+  }
+
+  function currentText() {
+    let lines = base.text.split(/\r?\n/);
+    if (lines.length && lines[lines.length - 1] === "") lines.pop();
+    for (const op of ops) lines = op(lines);
+    return lines.join("\n") + "\n";
+  }
+
+  function setStatus(s, isErr) {
+    $("status").textContent = s;
+    $("status").className = isErr ? "err" : "";
+  }
+
+  function edit(op) {
+    ops.push(op);
+    render(currentText());
+    save();
+  }
+
+  async function save() {
+    if (saving || !ops.length) return;
+    saving = true;
+    setStatus("Saving…");
+    try {
+      while (ops.length) {
+        const n = ops.length;
+        const text = currentText();
+        const r = await fetch(API, {
+          method: "PUT",
+          headers: { ...headers(), "Content-Type": "application/json" },
+          body: JSON.stringify({ message: "Update homework", content: b64encode(text), sha: base.sha, branch: "main" })
+        });
+        if (r.status === 409 || r.status === 422) {
+          // Someone (probably the GitHub editor) changed the file: reload and re-apply.
+          base = await loadFromGitHub();
+          continue;
+        }
+        if (!r.ok) throw new Error(r.status);
+        base = { text, sha: (await r.json()).content.sha };
+        ops = ops.slice(n);
+      }
+      setStatus("Saved ✓");
+    } catch (e) {
+      setStatus(e.message === "401" ? "Couldn't save: the GitHub key isn't working." : "Couldn't save. Check your connection and tap Retry.", true);
+      showRetry();
+    } finally {
+      saving = false;
+      render(currentText());
+    }
+  }
+
+  function showRetry() {
+    const b = el("button", "link", "Retry");
+    b.type = "button";
+    b.onclick = () => save();
+    $("status").append(" ", b);
+  }
+
+  // Line operations, matched by content so they survive reloads.
+  const replaceLine = (from, to) => lines => {
+    const i = lines.findIndex(l => l.trim() === from);
+    if (i === -1) return lines;
+    const copy = lines.slice();
+    if (to == null) copy.splice(i, 1); else copy[i] = to;
+    return copy;
+  };
+  const addLine = line => lines => [...lines, line];
+
+  // ---------- Undo toast ----------
+  let toastTimer = null;
+  function toast(text, undo) {
+    $("toast-text").textContent = text;
+    $("toast-undo").onclick = () => { hideToast(); undo(); };
+    $("toast").hidden = false;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(hideToast, 6000);
+  }
+  function hideToast() { $("toast").hidden = true; }
+
+  // ---------- Rendering ----------
+  const editing = () => !!(token && base);
+
+  function itemRow(it, label) {
+    const li = el("li");
+    if (!editing()) {
+      li.append(el("span", "title", it.title), el("span", "when", label(it)));
+      return li;
+    }
+    const isDone = it.line.startsWith(DONE.trim());
+    const box = el("input", "check");
+    box.type = "checkbox";
+    box.checked = isDone;
+    box.setAttribute("aria-label", (isDone ? "Mark not handed in: " : "Mark handed in: ") + it.title);
+    box.onchange = () => {
+      if (isDone) {
+        const restored = it.line.slice(DONE.trim().length).replace(/^\s*\|?\s*/, "");
+        edit(replaceLine(it.line, restored));
+      } else {
+        const doneLine = DONE + it.line;
+        edit(replaceLine(it.line, doneLine));
+        toast("Handed in: " + it.title, () => edit(replaceLine(doneLine, it.line)));
+      }
+    };
+    const title = el("span", "title", it.title);
+    title.tabIndex = 0;
+    title.setAttribute("role", "button");
+    title.onclick = () => openEditor(li, it);
+    title.onkeydown = e => { if (e.key === "Enter") openEditor(li, it); };
+    const x = el("button", "x", "×");
+    x.type = "button";
+    x.setAttribute("aria-label", "Delete " + it.title);
+    x.onclick = () => {
+      edit(replaceLine(it.line, null));
+      toast("Deleted: " + it.title, () => edit(addLine(it.line)));
+    };
+    li.append(box, title, el("span", "when", label(it)), x);
+    return li;
+  }
+
+  function classSelect(selected) {
+    const s = el("select");
+    s.setAttribute("aria-label", "Class");
+    const names = CLASSES.includes(selected) || !selected ? CLASSES : [...CLASSES, selected];
+    for (const c of names) {
+      const o = el("option", null, c);
+      o.value = c;
+      if (c === selected) o.selected = true;
+      s.append(o);
+    }
+    return s;
+  }
+
+  // Tap an assignment to change its name, class or date in place.
+  function openEditor(li, it) {
+    const isDone = it.line.startsWith(DONE.trim());
+    const form = el("form", "row-edit ui");
+    const what = el("input", "what");
+    what.type = "text"; what.value = it.title; what.required = true;
+    what.setAttribute("aria-label", "Assignment");
+    const cls = classSelect(it.cls);
+    const date = el("input");
+    date.type = "date"; date.value = isoDate(it.due); date.required = true;
+    date.setAttribute("aria-label", "Due date");
+    const actions = el("div", "actions");
+    const ok = el("button", "btn", "Save"); ok.type = "submit";
+    const cancel = el("button", "btn quiet", "Cancel"); cancel.type = "button";
+    actions.append(ok, cancel);
+    form.append(what, cls, date, actions);
+    form.onsubmit = e => {
+      e.preventDefault();
+      if (!what.value.trim() || !date.value) return;
+      const line = (isDone ? DONE : "") + makeLine(date.value, cls.value, what.value);
+      if (line !== it.line) edit(replaceLine(it.line, line)); else render(currentText());
+    };
+    cancel.onclick = () => render(currentText());
+    form.onkeydown = e => { if (e.key === "Escape") render(currentText()); };
+    li.replaceChildren(form);
+    what.focus();
+  }
+
+  function renderList(container, items, label, allClasses = true) {
     container.replaceChildren();
     items.sort((a, b) => a.due - b.due);
     // Every class gets a heading, even with nothing due; unknown class names go at the end.
     const extra = [...new Set(items.map(it => it.cls).filter(c => !CLASSES.includes(c)))].sort();
     for (const cls of [...CLASSES, ...extra]) {
-      container.append(el("h3", null, cls));
       const mine = items.filter(it => it.cls === cls);
+      if (!mine.length && !allClasses) continue;
+      container.append(el("h3", null, cls));
       if (!mine.length) { container.append(el("p", "empty", "Nothing")); continue; }
       const ul = el("ul");
-      for (const it of mine) {
-        const li = el("li");
-        li.append(el("span", null, it.title), el("span", "when", label(it)));
-        ul.append(li);
-      }
+      for (const it of mine) ul.append(itemRow(it, label));
       container.append(ul);
     }
+    if (!allClasses && !container.children.length) container.append(el("p", "empty", "Nothing"));
   }
-
 
   function render(text) {
     const today = startOfToday();
     // This coming Sunday (today if it's already Sunday).
     const sunday = new Date(today.getTime() + ((7 - today.getDay()) % 7) * DAY);
-    const { items, bad } = parse(text);
+    const { items, done, bad } = parse(text);
+    const ed = editing();
+    document.body.classList.toggle("editing", ed);
 
     const overdue = items.filter(it => it.due < today);
     const week = items.filter(it => it.due >= today && it.due <= sunday);
-    const later = items.filter(it => it.due > sunday).length;
+    const later = items.filter(it => it.due > sunday);
 
-    renderList(document.getElementById("overdue"), overdue, it => {
+    renderList($("overdue"), overdue, it => {
       const n = Math.round((today - it.due) / DAY);
       return n === 1 ? "1 day late" : n + " days late";
     });
-
-    renderList(document.getElementById("week"), week, it =>
+    renderList($("week"), week, it =>
       it.due.getTime() === today.getTime() ? "Today" : fmt(it.due));
 
-    document.getElementById("later").textContent =
-      later ? later + " more due after this week" : "";
+    $("later").textContent = !ed && later.length ? later.length + " more due after this week" : "";
+    $("upcoming-card").hidden = !ed;
+    $("done-card").hidden = !ed || !done.length;
+    if (ed) {
+      renderList($("upcoming"), later, it => fmt(it.due), false);
+      renderList($("done"), done, it => fmt(it.due), false);
+      $("done-title").textContent = "Handed in (" + done.length + ")";
+      $("clear-done").onclick = () => {
+        const lines = done.map(d => d.line);
+        edit(ls => ls.filter(l => !lines.includes(l.trim())));
+        toast("Deleted " + lines.length + " handed-in item" + (lines.length === 1 ? "" : "s"),
+          () => edit(ls => [...ls, ...lines]));
+      };
+    }
 
-    const note = document.getElementById("note");
+    const note = $("note");
     note.replaceChildren();
     if (bad.length) {
       const box = el("div", "note");
@@ -213,13 +526,81 @@
     }
   }
 
-  fetch("homework.txt", { cache: "no-store" })
-    .then(r => { if (!r.ok) throw new Error(r.status); return r.text(); })
-    .then(render)
-    .catch(() => {
-      document.getElementById("overdue").replaceChildren(el("p", "empty", "Couldn't load homework.txt."));
-      document.getElementById("week").replaceChildren(el("p", "empty", "Couldn't load homework.txt."));
-    });
+  // ---------- Add form ----------
+  function setupAdder() {
+    $("adder").hidden = false;
+    const sel = $("add-class");
+    if (!sel.options.length) {
+      for (const c of CLASSES) { const o = el("option", null, c); o.value = c; sel.append(o); }
+      $("add-date").value = isoDate(new Date(startOfToday().getTime() + DAY));
+    }
+    $("add-form").onsubmit = e => {
+      e.preventDefault();
+      const title = $("add-title").value.trim();
+      if (!title || !$("add-date").value) return;
+      edit(addLine(makeLine($("add-date").value, sel.value, title)));
+      // Like adding list items in Keep: clear the text and stay ready for the next one.
+      $("add-title").value = "";
+      $("add-title").focus();
+    };
+  }
+
+  // ---------- Start ----------
+  function showLoadError() {
+    $("overdue").replaceChildren(el("p", "empty", "Couldn't load homework.txt."));
+    $("week").replaceChildren(el("p", "empty", "Couldn't load homework.txt."));
+  }
+
+  async function startEditing() {
+    try {
+      base = await loadFromGitHub();
+    } catch (e) {
+      base = null;
+      return e;
+    }
+    $("setup").hidden = true;
+    $("edit-link").hidden = true;
+    $("stop-link").hidden = false;
+    setupAdder();
+    render(currentText());
+    return null;
+  }
+
+  $("edit-link").onclick = () => {
+    $("setup").hidden = false;
+    $("token").focus();
+  };
+
+  $("setup-form").onsubmit = async e => {
+    e.preventDefault();
+    token = $("token").value.trim();
+    $("setup-err").hidden = true;
+    const err = await startEditing();
+    if (err) {
+      token = null;
+      $("setup-err").textContent = "That key didn't work (" + err.message + "). Check that it has access to the homework-updates repo with Contents: Read and write.";
+      $("setup-err").hidden = false;
+      return;
+    }
+    try { localStorage.setItem(TOKEN_KEY, token); } catch (e) {}
+    $("token").value = "";
+  };
+
+  $("stop-link").onclick = () => {
+    try { localStorage.removeItem(TOKEN_KEY); } catch (e) {}
+    location.reload();
+  };
+
+  window.addEventListener("beforeunload", e => { if (ops.length) e.preventDefault(); });
+
+  (async () => {
+    if (token && !(await startEditing())) return;
+    if (token) setStatus("Couldn't open editing. Showing the published list.", true);
+    fetch("homework.txt", { cache: "no-store" })
+      .then(r => { if (!r.ok) throw new Error(r.status); return r.text(); })
+      .then(render)
+      .catch(showLoadError);
+  })();
 </script>
 </body>
 </html>
