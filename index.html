@@ -42,12 +42,7 @@
     background-repeat: no-repeat;
   }
   main { max-width: 600px; margin: 0 auto; padding: 40px 16px 56px; }
-  h1 { font-weight: 600; font-size: 1.9rem; line-height: 1.2; margin: 0 0 6px; color: var(--text); }
-  .asof {
-    font-family: "Inter", system-ui, sans-serif; font-weight: 300; font-size: 0.75rem;
-    letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted);
-    margin: 0 0 24px; padding-bottom: 12px; border-bottom: 1px solid var(--border);
-  }
+  h1 { font-weight: 600; font-size: 1.9rem; line-height: 1.2; margin: 0 0 24px; padding-bottom: 12px; border-bottom: 1px solid var(--border); color: var(--text); }
   .card {
     background: var(--card);
     -webkit-backdrop-filter: blur(24px) saturate(1.1);
@@ -64,7 +59,8 @@
   .overdue h2 { color: var(--red); }
   .week { border-left-color: var(--yellow); }
   .week h2 { color: var(--yellow); }
-  h3 { font-family: "Caveat", cursive; font-weight: 500; font-size: 1.35rem; color: var(--accent); margin: 14px 0 0; }
+  h3 { font-family: "Caveat", cursive; font-weight: 500; font-size: 1.35rem; color: var(--accent); margin: 12px 0 0; padding-top: 8px; border-top: 1px solid var(--border); }
+  h2 + div > h3:first-child { border-top: none; padding-top: 0; }
   ul { list-style: none; margin: 0; padding: 0; }
   li {
     display: flex; justify-content: space-between; gap: 12px;
@@ -77,7 +73,7 @@
   }
   .overdue .when { color: var(--red); background: var(--red-bg); }
   .week .when { color: var(--yellow); background: var(--yellow-bg); }
-  .empty { color: var(--muted); font-style: italic; margin: 4px 0; }
+  .empty { color: var(--muted); font-style: italic; font-size: 0.95rem; margin: 0 0 2px; }
   .later { color: var(--wood); font-size: 0.95rem; margin: 10px 0 0; }
   .later:empty { display: none; }
   .note {
@@ -91,7 +87,6 @@
 <body>
 <main>
   <h1>Simon's Homework</h1>
-  <p class="asof" id="asof"></p>
   <div id="note"></div>
   <section class="card overdue">
     <h2>Overdue</h2>
@@ -161,23 +156,25 @@
     return e;
   }
 
-  function renderList(container, items, label, emptyText) {
+  function renderList(container, items, label) {
     container.replaceChildren();
-    if (!items.length) { container.append(el("p", "empty", emptyText)); return; }
-    items.sort((a, b) => classRank(a.cls) - classRank(b.cls) || a.cls.localeCompare(b.cls) || a.due - b.due);
-    let ul, current;
-    for (const it of items) {
-      if (it.cls !== current) {
-        current = it.cls;
-        container.append(el("h3", null, current));
-        ul = el("ul");
-        container.append(ul);
+    items.sort((a, b) => a.due - b.due);
+    // Every class gets a heading, even with nothing due; unknown class names go at the end.
+    const extra = [...new Set(items.map(it => it.cls).filter(c => !CLASSES.includes(c)))].sort();
+    for (const cls of [...CLASSES, ...extra]) {
+      container.append(el("h3", null, cls));
+      const mine = items.filter(it => it.cls === cls);
+      if (!mine.length) { container.append(el("p", "empty", "Nothing")); continue; }
+      const ul = el("ul");
+      for (const it of mine) {
+        const li = el("li");
+        li.append(el("span", null, it.title), el("span", "when", label(it)));
+        ul.append(li);
       }
-      const li = el("li");
-      li.append(el("span", null, it.title), el("span", "when", label(it)));
-      ul.append(li);
+      container.append(ul);
     }
   }
+
 
   function render(text) {
     const today = startOfToday();
@@ -189,16 +186,13 @@
     const week = items.filter(it => it.due >= today && it.due <= sunday);
     const later = items.filter(it => it.due > sunday).length;
 
-    document.getElementById("asof").textContent =
-      "As of " + today.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric", year: "numeric" });
-
     renderList(document.getElementById("overdue"), overdue, it => {
       const n = Math.round((today - it.due) / DAY);
       return n === 1 ? "1 day late" : n + " days late";
-    }, "Nothing overdue.");
+    });
 
     renderList(document.getElementById("week"), week, it =>
-      it.due.getTime() === today.getTime() ? "Today" : fmt(it.due), "Nothing due this week.");
+      it.due.getTime() === today.getTime() ? "Today" : fmt(it.due));
 
     document.getElementById("later").textContent =
       later ? later + " more due after this week" : "";
