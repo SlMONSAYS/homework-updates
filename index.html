@@ -84,8 +84,6 @@
   .week .when { color: var(--yellow); background: var(--yellow-bg); }
   .upcoming .when, .done .when { color: var(--muted); background: var(--field); }
   .empty { color: var(--muted); font-size: 0.95rem; margin: 0 0 2px; }
-  .later { color: var(--wood); font-size: 0.95rem; margin: 10px 0 0; }
-  .later:empty { display: none; }
   .note {
     background: var(--pink-bg); color: var(--pink);
     border: 1px solid rgba(232, 163, 196, 0.25);
@@ -181,10 +179,9 @@
   <section class="card week">
     <h2>Due this week</h2>
     <div id="week"><p class="empty">Loading…</p></div>
-    <p class="later" id="later"></p>
   </section>
   </div>
-  <section class="card upcoming" id="upcoming-card" hidden>
+  <section class="card upcoming">
     <h2>Later</h2>
     <div id="upcoming"></div>
   </section>
@@ -572,11 +569,9 @@
     renderList($("week"), week, it =>
       +it.due === +today ? "Today" : +it.due === +sunday ? "This week" : fmt(it.due), "Nothing due this week.");
 
-    $("later").textContent = !ed && later.length ? later.length + " more due after this week" : "";
-    $("upcoming-card").hidden = !ed;
+    renderList($("upcoming"), later, it => +it.due === +addDays(sunday, 7) ? "Next week" : fmt(it.due), "Nothing due later.");
     $("done-card").hidden = !ed || !done.length;
     if (ed) {
-      renderList($("upcoming"), later, it => +it.due === +addDays(sunday, 7) ? "Next week" : fmt(it.due));
       renderList($("done"), done, it => fmt(it.due));
       $("done-title").textContent = "Handed in (" + done.length + ")";
       $("clear-done").onclick = () => {
