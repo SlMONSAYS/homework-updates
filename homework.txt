@@ -30,7 +30,7 @@
 # done 2026-10-22 17:48 | 2026-10-01 | Chemistry 11 | Pre Atoms and Molecules Reflections
 2026-09-24 | Chemistry 11 | Naming Activity
 2026-09-24 | Chemistry 11 | Periodic Trends Activity
-2026-10-01 | Chemistry 11 | Separation Lab
+# done 2026-10-22 21:21 | 2026-10-01 | Chemistry 11 | Separation Lab
 2026-10-30 | Chemistry 11 | LARGE Assignment - Atoms and Molecules Workbook
 2026-10-25 | Chemistry 11 | Post Atoms and Molecules Reflection Questions
 2026-10-08 | Anatomy and Physiology 12 | The Parts of the Cell - Worksheet 5
