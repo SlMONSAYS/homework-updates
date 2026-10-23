@@ -15,7 +15,7 @@
     --accent: #7ba576;     /* muted forest green */
     --wood: #a08b72;
     --border: rgba(255, 255, 255, 0.08);
-    --card: rgba(22, 25, 22, 0.55);
+    --card: rgba(22, 25, 22, 0.72);   /* no blur behind cards: backdrop-filter caused dark boxes while scrolling */
     --field: rgba(255, 255, 255, 0.05);
     --red: #e08a7c;        /* ember red: overdue */
     --red-bg: rgba(224, 138, 124, 0.14);
@@ -51,8 +51,6 @@
   h1 { font-weight: 600; font-size: 1.9rem; line-height: 1.2; margin: 0 0 24px; padding-bottom: 12px; border-bottom: 1px solid var(--border); color: var(--text); }
   .card {
     background: var(--card);
-    -webkit-backdrop-filter: blur(24px) saturate(1.1);
-    backdrop-filter: blur(24px) saturate(1.1);
     border: 1px solid rgba(255, 255, 255, 0.06);
     border-left: 4px solid;
     border-radius: 12px;
