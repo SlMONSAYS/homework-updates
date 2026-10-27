@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Simon's Homework Updates</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300..700;1,14..32,400&display=swap" rel="stylesheet">
 <style>
   /* Forest-at-night palette, matching simon's little corner */
   :root {
@@ -30,7 +30,9 @@
     margin: 0;
     min-height: 100vh;
     color: var(--text);
-    font: 17px/1.6 "Lora", Georgia, serif;
+    font: 16px/1.6 "Inter", system-ui, -apple-system, sans-serif;
+    font-optical-sizing: auto;
+    -webkit-font-smoothing: antialiased;
     background-color: var(--bg);
     /* Dark watercolour wash: forest green, slate blue, a hint of lamplight */
     background-image:
@@ -48,7 +50,7 @@
     main { max-width: 1040px; }
     .columns { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; }
   }
-  h1 { font-weight: 600; font-size: 1.9rem; line-height: 1.2; margin: 0 0 24px; padding-bottom: 12px; border-bottom: 1px solid var(--border); color: var(--text); }
+  h1 { font-weight: 600; font-size: 1.85rem; letter-spacing: -0.025em; line-height: 1.2; margin: 0 0 24px; padding-bottom: 12px; border-bottom: 1px solid var(--border); color: var(--text); }
   .card {
     background: var(--card);
     border: 1px solid rgba(255, 255, 255, 0.06);
@@ -58,7 +60,7 @@
     padding: 18px 20px;
     margin-bottom: 18px;
   }
-  .card h2 { font-size: 1.2rem; font-weight: 600; margin: 0 0 6px; }
+  .card h2 { font-size: 1.1rem; font-weight: 600; letter-spacing: -0.01em; margin: 0 0 6px; }
   .overdue { border-left-color: var(--red); }
   .overdue h2 { color: var(--red); }
   .week { border-left-color: var(--yellow); }
