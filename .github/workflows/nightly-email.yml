@@ -1,0 +1,43 @@
+name: Nightly email
+
+on:
+  schedule:
+    # 9:07 PM in Vancouver is 04:07 UTC in summer and 05:07 UTC in winter. Both run;
+    # the script only sends from the one that lands at 9 PM local time.
+    - cron: "7 4,5 * * *"
+  workflow_dispatch:
+    inputs:
+      test:
+        description: "Test email: send now, marked [Test], without counting as tonight's email"
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+concurrency: nightly-email
+
+jobs:
+  email:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Send the email
+        run: python3 scripts/nightly_email.py
+        env:
+          GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          PARENT_EMAIL: ${{ secrets.PARENT_EMAIL }}
+          TEST: ${{ github.event_name == 'workflow_dispatch' && inputs.test }}
+
+      # Remembering when it was sent also keeps the repo active, so GitHub doesn't pause the schedule.
+      - name: Remember when it was sent
+        run: |
+          git add email-state.json 2>/dev/null || exit 0
+          git diff --cached --quiet && exit 0
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Nightly email sent"
+          git pull --rebase
+          git push
