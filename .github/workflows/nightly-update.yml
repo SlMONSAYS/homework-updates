@@ -1,4 +1,4 @@
-name: Nightly email
+name: Nightly Telegram update
 
 on:
   schedule:
@@ -7,37 +7,39 @@ on:
     - cron: "7 4,5 * * *"
   workflow_dispatch:
     inputs:
-      test:
-        description: "Test email: send now, marked [Test], without counting as tonight's email"
-        type: boolean
-        default: true
+      action:
+        description: "What to do"
+        type: choice
+        options:
+          - Send a test message
+          - Find my group
+        default: Send a test message
 
 permissions:
   contents: write
 
-concurrency: nightly-email
+concurrency: nightly-update
 
 jobs:
-  email:
+  update:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Send the email
-        run: python3 scripts/nightly_email.py
+      - name: Post to Telegram
+        run: python3 scripts/nightly_update.py
         env:
-          GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
-          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
-          PARENT_EMAIL: ${{ secrets.PARENT_EMAIL }}
-          TEST: ${{ github.event_name == 'workflow_dispatch' && inputs.test }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          MODE: ${{ github.event_name != 'workflow_dispatch' && 'nightly' || inputs.action == 'Find my group' && 'find-group' || 'test' }}
 
       # Remembering when it was sent also keeps the repo active, so GitHub doesn't pause the schedule.
       - name: Remember when it was sent
         run: |
-          git add email-state.json 2>/dev/null || exit 0
+          git add update-state.json 2>/dev/null || exit 0
           git diff --cached --quiet && exit 0
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "Nightly email sent"
+          git commit -m "Nightly update sent"
           git pull --rebase
           git push
