@@ -17,6 +17,7 @@ import json
 import os
 import re
 import sys
+import urllib.error
 import urllib.request
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -86,15 +87,21 @@ def telegram(method, token, payload=None):
         data=json.dumps(payload or {}).encode(),
         headers={"Content-Type": "application/json"},
     )
-    with urllib.request.urlopen(req, timeout=30) as r:
-        return json.load(r)
+    try:
+        with urllib.request.urlopen(req, timeout=30) as r:
+            return json.load(r)
+    except urllib.error.HTTPError as e:
+        return json.load(e)   # Telegram explains errors in the body, e.g. a wrong token or chat ID
 
 
 def find_group(token):
     """Print the groups the bot can see. Telegram only keeps these for about a day."""
     me = telegram("getMe", token).get("result", {})
     username = me.get("username", "your_bot")
-    updates = telegram("getUpdates", token).get("result", [])
+    got = telegram("getUpdates", token)
+    if not got.get("ok"):
+        sys.exit(f"Telegram returned an error: {got.get('description', got)}")
+    updates = got.get("result", [])
     chats = {}
     for u in updates:
         for key in ("message", "my_chat_member", "chat_member", "edited_message"):
