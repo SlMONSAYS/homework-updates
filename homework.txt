@@ -6,12 +6,8 @@
 #          Careers 12, PE 12, Psychology 12, Miscellaneous
 # Delete a line when the work is handed in. Lines starting with # are ignored.
 # Items checked off on the website become '# done <date> <time> | ...' lines (the Submitted list).
-# done 2026-10-22 23:01 | 2026-10-08 | Anatomy and Physiology 12 | Katina's Bad Day
 2026-10-25 | Humanities 12 | Take WSQ Notes On 12 Videos
-# done 2026-10-26 20:33 | 2026-10-25 | Humanities 12 | Animal Farm Workbook
 2026-10-08 | Humanities 12 | Canvatoon Mini-Assignment
-# done 2026-10-26 21:12 | 2026-10-25 | Humanities 12 | Do Research For Stalin Presentation and Write Script
-# done 2026-10-27 11:55 | 2026-10-25 | Humanities 12 | Make Edits to 1920s Women's Suffrage Newspsaper (Peer Editing In Class Tuesday)
 2026-11-01 | Humanities 12 | LARGE Assignment - Take RSQ Notes On Entirety Novel "Great Gatsby"
 2026-10-15 | Careers 12 | Do Quick Research On Worker's Unions - Email Findings to Mr. McKaig
 2026-11-16 | Miscellaneous | Start A Work Experience/Volunteer Log (30 Hours Mandatory For Graduation)
@@ -20,17 +16,14 @@
 2026-10-25 | Psychology 12 | Research Paper on a Psychologist
 2026-10-25 | Psychology 12 | The Ethics of Psychological Research
 2026-10-30 | Psychology 12 | Proctored Test #1 - Psychologists and Research Methods
-# done 2026-10-23 20:38 | 2026-10-08 | Math 11 | Chapter 1 Test
 2026-10-15 | Math 11 | Mid Chapter 2 Quiz
 2026-10-25 | Math 11 | Section 2.4 Assignment
 2026-10-25 | Math 11 | Chapter 2 Test Multiple Choice
 2026-10-26 | Math 11 | Chapter 2 Test Written Response
 2026-10-25 | Chemistry 11 | Review For Retake of Chemical Naming Quiz On Wednesday
 2026-10-25 | Chemistry 11 | Study For Periodic Trends Quiz On Wednesday
-# done 2026-10-22 17:48 | 2026-10-01 | Chemistry 11 | Pre Atoms and Molecules Reflections
 2026-09-24 | Chemistry 11 | Naming Activity
 2026-09-24 | Chemistry 11 | Periodic Trends Activity
-# done 2026-10-22 21:21 | 2026-10-01 | Chemistry 11 | Separation Lab
 2026-10-30 | Chemistry 11 | LARGE Assignment - Atoms and Molecules Workbook
 2026-10-25 | Chemistry 11 | Post Atoms and Molecules Reflection Questions
 2026-10-08 | Anatomy and Physiology 12 | The Parts of the Cell - Worksheet 5
@@ -38,4 +31,3 @@
 2026-12-07 | PE 12 | UNIT 1 Health Project | Where does your help come from?
 2026-11-11 | Careers 12 | Personality Quiz
 2026-11-01 | Anatomy and Physiology 12 | Pemba's Ordeal - Case Study
-# done 2026-10-27 12:13 | 2026-11-01 | Anatomy and Physiology 12 | Worksheet 8 - Cellular Respiration
