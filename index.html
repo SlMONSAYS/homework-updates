@@ -104,6 +104,25 @@
   .note code { white-space: pre-wrap; word-break: break-word; }
   [hidden] { display: none !important; }
 
+  /* "Frost clear" on page load: the page starts blurred like frosted glass and sharpens,
+     piece by piece. It waits for the homework to load, then runs once. */
+  body.loading main { opacity: 0; }
+  body.frost main > * { animation: frost 0.9s cubic-bezier(0.25, 0.8, 0.25, 1) both; }
+  body.frost main > :nth-child(2) { animation-delay: 0.06s; }
+  body.frost main > :nth-child(3) { animation-delay: 0.12s; }
+  body.frost .columns > :nth-child(2) { animation: frost 0.9s cubic-bezier(0.25, 0.8, 0.25, 1) 0.2s both; }
+  body.frost main > :nth-child(4) { animation-delay: 0.18s; }
+  body.frost main > :nth-child(5) { animation-delay: 0.28s; }
+  body.frost main > :nth-child(n+6) { animation-delay: 0.36s; }
+  @keyframes frost {
+    from { opacity: 0; filter: blur(8px); transform: scale(0.985); }
+    to { opacity: 1; filter: none; transform: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    body.frost main > *, body.frost .columns > * { animation: fade 0.3s ease both; animation-delay: 0s; }
+    @keyframes fade { from { opacity: 0; } }
+  }
+
   /* --- Editing (only shown on Simon's devices) --- */
   button, input, select { font: inherit; color: inherit; }
   .ui { font-family: "Inter", system-ui, sans-serif; font-size: 0.9rem; }
@@ -165,7 +184,7 @@
   .toast .link { color: var(--accent); font-weight: 600; text-decoration: none; }
 </style>
 </head>
-<body>
+<body class="loading">
 <main>
   <h1>Simon's Homework Updates</h1>
   <div id="note"></div>
@@ -594,10 +613,22 @@
     return w === 1 ? "1 week late" : w + " weeks late";
   }
 
+  // Run the load animation once, on the first real render (or after 2.5s if loading is slow).
+  let revealed = false;
+  function reveal() {
+    if (revealed) return;
+    revealed = true;
+    document.body.classList.remove("loading");
+    document.body.classList.add("frost");
+    setTimeout(() => document.body.classList.remove("frost"), 1600);
+  }
+  setTimeout(reveal, 2500);
+
   function render(text) {
     const today = startOfToday();
     const sunday = thisSunday();
     const { items, done, bad } = parse(text);
+    reveal();
     const ed = editing();
     document.body.classList.toggle("editing", ed);
 
@@ -680,6 +711,7 @@
   }
 
   function showLoadError() {
+    reveal();
     $("overdue").replaceChildren(el("p", "empty", "Couldn't load homework.txt."));
     $("week").replaceChildren(el("p", "empty", "Couldn't load homework.txt."));
   }
