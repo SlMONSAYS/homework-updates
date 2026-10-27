@@ -91,7 +91,9 @@ def telegram(method, token, payload=None):
 
 
 def find_group(token):
-    """Print the groups the bot can see. Telegram only keeps these for about a day after the bot is added."""
+    """Print the groups the bot can see. Telegram only keeps these for about a day."""
+    me = telegram("getMe", token).get("result", {})
+    username = me.get("username", "your_bot")
     updates = telegram("getUpdates", token).get("result", [])
     chats = {}
     for u in updates:
@@ -99,9 +101,14 @@ def find_group(token):
             chat = (u.get(key) or {}).get("chat")
             if chat and chat.get("type") in ("group", "supergroup"):
                 chats[chat["id"]] = chat.get("title", "")
+    print(f"Bot @{username} can see {len(updates)} recent update(s).")
     if not chats:
-        sys.exit("No groups found. Add the bot to your family group, send any message there "
-                 "(for example /hello), then run this again within a day.")
+        sys.exit("No groups found yet. In Telegram:\n"
+                 f"  1. Make sure @{username} is a member of your family group.\n"
+                 f"  2. In the group, send exactly:  /hello@{username}\n"
+                 "     (bots in groups ignore normal messages; a command with the bot's name gets through)\n"
+                 "  3. Run 'Find my group' again within a day.\n"
+                 "If it still finds nothing, remove the bot from the group, add it back, and repeat.")
     for chat_id, title in chats.items():
         # This log is public on a public repo, so only hint at the group's name.
         print(f"Group starting with '{title[:1]}' ({len(title)} letters): TELEGRAM_CHAT_ID = {chat_id}")
