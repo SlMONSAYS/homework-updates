@@ -8,7 +8,7 @@
 # Items checked off on the website become '# done <date> <time> | ...' lines (the Submitted list).
 # done 2026-10-22 23:01 | 2026-10-08 | Anatomy and Physiology 12 | Katina's Bad Day
 2026-10-25 | Humanities 12 | Take WSQ Notes On 12 Videos
-2026-10-25 | Humanities 12 | Animal Farm Workbook
+# done 2026-10-26 20:33 | 2026-10-25 | Humanities 12 | Animal Farm Workbook
 2026-10-08 | Humanities 12 | Canvatoon Mini-Assignment
 2026-10-25 | Humanities 12 | Do Research For Stalin Presentation and Write Script
 2026-10-25 | Humanities 12 | Make Edits to 1920s Women's Suffrage Newspsaper (Peer Editing In Class Tuesday)
