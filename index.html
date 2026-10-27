@@ -84,7 +84,12 @@
   .done-intro { color: var(--muted); font-size: 0.95rem; margin: 0 0 4px; }
   .progress { font-size: 0.9rem; color: var(--muted); margin: 0 0 4px; }
   .progress b { color: var(--wood); font-weight: 600; }
-  .more-hint { color: var(--muted); font-size: 0.85rem; margin: 4px 0 0 18px; }
+  .more-hint {
+    display: block; margin: 6px 0 0 18px; padding: 2px 0; background: none; border: none; cursor: pointer;
+    font-family: inherit; font-size: 0.85rem; font-weight: 600; color: var(--muted);
+    text-decoration: underline; text-underline-offset: 3px;
+  }
+  .more-hint:hover { color: var(--text); }
   .show-more { margin-top: 14px; display: block; }
   .note-line { display: block; color: var(--muted); font-size: 0.88rem; }
   .big {
@@ -649,6 +654,10 @@
     items.sort(order);
     const open = expanded.has(container.id);
     let overflow = false;
+    const toggle = key => {
+      if (expanded.has(key)) expanded.delete(key); else expanded.add(key);
+      render(currentShownText);
+    };
     // Only classes with something in this list get a heading, in class order; unknown class names go at the end.
     const extra = [...new Set(items.map(it => it.cls).filter(c => !CLASSES.includes(c)))].sort();
     for (const cls of [...CLASSES, ...extra]) {
@@ -656,11 +665,19 @@
       if (!mine.length) continue;
       container.append(el("h3", null, cls));
       const ul = el("ul");
-      const shown = open ? mine : mine.slice(0, PER_CLASS);
+      const clsKey = container.id + "|" + cls;
+      const clsOpen = open || expanded.has(clsKey);
+      const shown = clsOpen ? mine : mine.slice(0, PER_CLASS);
       for (const it of shown) ul.append(itemRow(it, label));
       container.append(ul);
       if (mine.length > PER_CLASS) overflow = true;
-      if (shown.length < mine.length) container.append(el("p", "more-hint", "+" + (mine.length - shown.length) + " more"));
+      // Tap "Show N more" to open just this class; "Show less" closes it again.
+      if (mine.length > PER_CLASS && !open) {
+        const more = el("button", "more-hint", clsOpen ? "Show less" : "Show " + (mine.length - PER_CLASS) + " more");
+        more.type = "button";
+        more.onclick = () => toggle(clsKey);
+        container.append(more);
+      }
     }
     if (!container.children.length) container.append(el("p", "empty", emptyText));
     if (overflow) {
@@ -668,6 +685,7 @@
       b.type = "button";
       b.onclick = () => {
         if (open) expanded.delete(container.id); else expanded.add(container.id);
+        for (const k of [...expanded]) if (k.startsWith(container.id + "|")) expanded.delete(k);
         render(currentShownText);
         if (open) container.closest(".card").scrollIntoView({ block: "nearest" });
       };
