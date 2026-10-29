@@ -7,20 +7,25 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300..700;1,14..32,400&display=swap" rel="stylesheet">
 <style>
-  /* Forest-at-night palette, matching simon's little corner */
+  /* Arctic night palette: cold slate and ice blue */
   :root {
-    --bg: #151815;
-    --text: #e4dfd6;       /* warm cream */
-    --muted: #8a857b;
-    --accent: #7ba576;     /* muted forest green */
-    --wood: #a08b72;
+    --bg: #0c1016;
+    --text: #e6edf3;       /* frost white */
+    --muted: #7d8a99;
+    --accent: #7fd1c7;     /* glacier teal: Later, buttons, checkmarks */
+    --accent-bg: rgba(127, 209, 199, 0.13);
+    --on-accent: #0a1c1a;
+    --steel: #9fb3c8;      /* Submitted */
+    --steel-bg: rgba(159, 179, 200, 0.14);
+    --today: #8ec5ff;      /* ice blue: Today */
+    --today-bg: rgba(142, 197, 255, 0.13);
     --border: rgba(255, 255, 255, 0.08);
-    --card: rgba(22, 25, 22, 0.72);   /* no blur behind cards: backdrop-filter caused dark boxes while scrolling */
+    --card: rgba(18, 24, 32, 0.78);   /* no blur behind cards: backdrop-filter caused dark boxes while scrolling */
     --field: rgba(255, 255, 255, 0.05);
-    --red: #e08a7c;        /* ember red: overdue */
-    --red-bg: rgba(224, 138, 124, 0.14);
-    --yellow: #e3c06b;     /* lamplight amber: due this week */
-    --yellow-bg: rgba(227, 192, 107, 0.14);
+    --red: #ff8e8e;        /* overdue */
+    --red-bg: rgba(255, 142, 142, 0.13);
+    --yellow: #f2cf72;     /* due this week */
+    --yellow-bg: rgba(242, 207, 114, 0.13);
     --pink: #e8a3c4;
     --pink-bg: rgba(232, 163, 196, 0.12);
     color-scheme: dark;
@@ -34,13 +39,13 @@
     font-optical-sizing: auto;
     -webkit-font-smoothing: antialiased;
     background-color: var(--bg);
-    /* Dark watercolour wash: forest green, slate blue, a hint of lamplight */
+    /* Frosted wash: deep navy and slate blue fading in and out, a hint of glacier teal */
     background-image:
-      radial-gradient(ellipse 80% 60% at 15% 20%, rgba(45, 72, 50, 0.35), rgba(45, 72, 50, 0.12) 40%, transparent 70%),
-      radial-gradient(ellipse 70% 80% at 80% 35%, rgba(42, 55, 68, 0.30), rgba(42, 55, 68, 0.10) 45%, transparent 75%),
-      radial-gradient(ellipse 90% 50% at 50% 90%, rgba(35, 60, 40, 0.40), rgba(35, 60, 40, 0.15) 35%, transparent 65%),
-      radial-gradient(ellipse 50% 45% at 70% 10%, rgba(38, 62, 60, 0.25), rgba(38, 62, 60, 0.08) 50%, transparent 80%),
-      radial-gradient(ellipse 30% 25% at 25% 85%, rgba(70, 65, 48, 0.18), rgba(70, 65, 48, 0.05) 50%, transparent 80%);
+      radial-gradient(ellipse 80% 60% at 15% 20%, rgba(36, 64, 110, 0.38), rgba(36, 64, 110, 0.12) 40%, transparent 70%),
+      radial-gradient(ellipse 70% 80% at 80% 35%, rgba(46, 58, 98, 0.32), rgba(46, 58, 98, 0.10) 45%, transparent 75%),
+      radial-gradient(ellipse 90% 50% at 50% 90%, rgba(26, 52, 88, 0.42), rgba(26, 52, 88, 0.15) 35%, transparent 65%),
+      radial-gradient(ellipse 50% 45% at 70% 10%, rgba(40, 86, 110, 0.26), rgba(40, 86, 110, 0.08) 50%, transparent 80%),
+      radial-gradient(ellipse 30% 25% at 25% 85%, rgba(110, 140, 190, 0.14), rgba(110, 140, 190, 0.04) 50%, transparent 80%);
     background-attachment: fixed;
     background-repeat: no-repeat;
   }
@@ -51,15 +56,18 @@
     .columns { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; }
   }
   /* Glanceable counts under the title; each one jumps to its card. */
-  .summary { display: flex; flex-wrap: wrap; gap: 8px; margin: -8px 0 22px; }
+  .verse { color: #a7b3c2; font-size: 0.95rem; line-height: 1.55; margin: -8px 0 18px; max-width: 72ch; }
+  .verse cite { font-style: normal; color: var(--muted); white-space: nowrap; }
+  .summary { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 22px; }
   .chip {
     font-family: inherit; font-size: 0.85rem; font-weight: 600; border: none; cursor: pointer;
     border-radius: 8px; padding: 5px 12px; line-height: 1.4;
   }
   .chip.red { color: var(--red); background: var(--red-bg); }
   .chip.yellow { color: var(--yellow); background: var(--yellow-bg); }
-  .chip.green { color: var(--accent); background: rgba(123, 165, 118, 0.14); }
-  .chip.wood { color: var(--wood); background: rgba(160, 139, 114, 0.16); }
+  .chip.green { color: var(--accent); background: var(--accent-bg); }
+  .chip.steel { color: var(--steel); background: var(--steel-bg); }
+  .chip.today { color: var(--today); background: var(--today-bg); }
   .count { font-weight: 500; opacity: 0.7; }
   h1 { font-weight: 600; font-size: 1.85rem; letter-spacing: -0.025em; line-height: 1.2; margin: 0 0 24px; padding-bottom: 12px; border-bottom: 1px solid var(--border); color: var(--text); }
   .card {
@@ -76,14 +84,23 @@
   .overdue h2 { color: var(--red); }
   .week { border-left-color: var(--yellow); }
   .week h2 { color: var(--yellow); }
+  .today-card { border-left-color: var(--today); }
+  .today-card h2 { color: var(--today); }
+  .today-card .when { color: var(--today); background: var(--today-bg); }
+  .today-card .when.late { color: var(--red); background: var(--red-bg); }
+  .today-card .when.done-tag { color: var(--accent); background: var(--accent-bg); }
+  .today-card ul { border-left: none; padding-left: 0; margin-left: 0; }
+  .today-card li.is-done .title { text-decoration: line-through; color: var(--muted); }
+  .cls-inline { color: var(--muted); font-size: 0.88rem; white-space: nowrap; }
+  .today-hint { color: var(--muted); font-size: 0.85rem; margin: 8px 0 0; }
   .upcoming, .adder { border-left-color: var(--accent); }
   .upcoming h2, .adder h2 { color: var(--accent); }
-  /* Submitted log sits apart from the to-do cards, in weathered-wood brown. */
-  .done { border-left-color: var(--wood); margin-top: 40px; }
-  .done h2 { color: var(--wood); }
+  /* Submitted log sits apart from the to-do cards, in steel blue. */
+  .done { border-left-color: var(--steel); margin-top: 40px; }
+  .done h2 { color: var(--steel); }
   .done-intro { color: var(--muted); font-size: 0.95rem; margin: 0 0 4px; }
   .progress { font-size: 0.9rem; color: var(--muted); margin: 0 0 4px; }
-  .progress b { color: var(--wood); font-weight: 600; }
+  .progress b { color: var(--steel); font-weight: 600; }
   .more-hint {
     display: block; margin: 6px 0 0 18px; padding: 2px 0; background: none; border: none; cursor: pointer;
     font-family: inherit; font-size: 0.85rem; font-weight: 600; color: var(--muted);
@@ -111,7 +128,7 @@
     padding: 7px 0; border-top: 1px solid var(--border);
   }
   li:first-child { border-top: none; }
-  .title { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+  .title { flex: 1; min-width: 0; overflow-wrap: break-word; }
   .when {
     font-family: "Inter", system-ui, sans-serif; white-space: nowrap; font-size: 0.8rem; font-weight: 600;
     padding: 2px 9px; border-radius: 6px; margin-top: 3px;
@@ -119,7 +136,7 @@
   .overdue .when { color: var(--red); background: var(--red-bg); }
   .week .when { color: var(--yellow); background: var(--yellow-bg); }
   .upcoming .when { color: var(--muted); background: var(--field); }
-  .done .when { color: var(--accent); background: rgba(123, 165, 118, 0.14); }
+  .done .when { color: var(--accent); background: var(--accent-bg); }
   .done .when.late { color: var(--red); background: var(--red-bg); }
   .empty { color: var(--muted); font-size: 0.95rem; margin: 0 0 2px; }
   .note {
@@ -134,7 +151,9 @@
      piece by piece. It waits for the homework to load, then runs once. */
   body.loading main { opacity: 0; }
   body.frost main > * { animation: frost 0.9s cubic-bezier(0.25, 0.8, 0.25, 1) both; }
+  body.frost .verse { animation-delay: 0.03s; }
   body.frost .summary { animation-delay: 0.06s; }
+  body.frost .today-card { animation-delay: 0.1s; }
   body.frost .columns { animation-delay: 0.14s; }
   body.frost .col-right { animation: frost 0.9s cubic-bezier(0.25, 0.8, 0.25, 1) 0.24s both; }
   body.frost .done, body.frost footer { animation-delay: 0.34s; }
@@ -156,7 +175,7 @@
   }
   select {
     appearance: none; -webkit-appearance: none; padding-right: 36px; cursor: pointer;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%238a857b' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%237d8a99' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
     background-repeat: no-repeat; background-position: right 14px center; background-size: 12px 8px;
   }
   .when-pick { display: grid; gap: 8px; }
@@ -164,7 +183,7 @@
   input:focus, select:focus, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
   .btn {
     font-family: "Inter", system-ui, sans-serif; font-size: 0.9rem; font-weight: 600;
-    background: var(--accent); color: #142014; border: none; border-radius: 8px;
+    background: var(--accent); color: var(--on-accent); border: none; border-radius: 8px;
     padding: 8px 14px; min-height: 40px; cursor: pointer;
   }
   .btn.quiet { background: var(--field); color: var(--text); font-weight: 400; }
@@ -179,13 +198,29 @@
     display: grid; place-content: center;
   }
   .check:checked { background: var(--accent); border-color: var(--accent); }
-  .check:checked::after { content: ""; width: 6px; height: 11px; border: solid #142014; border-width: 0 2.5px 2.5px 0; transform: translateY(-1px) rotate(45deg); }
+  .check:checked::after { content: ""; width: 6px; height: 11px; border: solid var(--on-accent); border-width: 0 2.5px 2.5px 0; transform: translateY(-1px) rotate(45deg); }
   .editing .title { cursor: text; }
   .x {
     flex: none; width: 30px; height: 30px; margin-top: -1px; border: none; border-radius: 6px;
     background: none; color: var(--muted); font-size: 1.3rem; line-height: 1; cursor: pointer;
   }
   .x:hover { background: var(--field); color: var(--text); }
+  .sun {
+    flex: none; width: 30px; height: 30px; margin-top: -1px; border: none; border-radius: 6px;
+    background: none; color: var(--muted); font-size: 1.15rem; line-height: 1; cursor: pointer;
+  }
+  .sun:hover { background: var(--field); color: var(--today); }
+  .sun.on { color: var(--today); }
+  /* On phones, when editing: the tag moves under the title so the title gets the full width. */
+  @media (max-width: 600px) {
+    .editing li { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; column-gap: 8px; row-gap: 4px; align-items: start; }
+    .editing li > .check { grid-column: 1; grid-row: 1 / span 2; }
+    .editing li > .main { grid-column: 2; grid-row: 1; }
+    .editing li > .when { grid-column: 2; grid-row: 2; justify-self: start; margin-top: 0; }
+    .editing li > .sun { grid-column: 3; grid-row: 1; }
+    .editing li > .x { grid-column: 4; grid-row: 1; }
+    .editing li > .row-edit { grid-column: 1 / -1; }
+  }
   .main { flex: 1; min-width: 0; }
   .main .title { display: block; }
   .stamp { display: block; font-style: italic; color: var(--muted); font-size: 0.92rem; }
@@ -197,6 +232,7 @@
   .big-toggle { grid-column: 1 / -1; display: flex; align-items: center; gap: 8px; cursor: pointer; color: var(--muted); }
   .big-toggle .check { margin: 0; }
   .add-grid .note-in, .row-edit .note-in { grid-column: 1 / -1; }
+  .esv { flex-basis: 100%; font-size: 0.72rem; opacity: 0.75; }
   footer { margin-top: 28px; display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; color: var(--muted); }
   .setup p { margin: 0 0 10px; font-size: 0.95rem; }
   .setup .row { display: flex; gap: 8px; margin-bottom: 10px; }
@@ -205,7 +241,7 @@
   .err { color: var(--red); }
   .toast {
     position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%);
-    background: #2a2e2a; color: var(--text); border: 1px solid var(--border); border-radius: 10px;
+    background: #18202a; color: var(--text); border: 1px solid var(--border); border-radius: 10px;
     box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4); padding: 10px 14px;
     display: flex; gap: 16px; align-items: center; max-width: calc(100% - 32px);
   }
@@ -215,6 +251,7 @@
 <body class="loading">
 <main>
   <h1>Simon's Homework Updates</h1>
+  <p class="verse" id="verse"></p>
   <div class="summary" id="summary"></div>
   <div id="note"></div>
 
@@ -228,6 +265,11 @@
       <label class="big-toggle"><input type="checkbox" class="check" id="add-big"> ★ Big assignment</label>
       <button class="btn" type="submit">Add</button>
     </form>
+  </section>
+
+  <section class="card today-card" id="today-card">
+    <h2>Today <span class="count" id="today-count"></span></h2>
+    <div id="today"></div>
   </section>
 
   <div class="columns">
@@ -281,6 +323,7 @@
     <span id="status"></span>
     <button class="link" id="login-link" type="button">Log in</button>
     <button class="link" id="logout-link" type="button" hidden>Log out</button>
+    <span class="esv">Scripture quotations are from the ESV® Bible (The Holy Bible, English Standard Version®), © 2001 by Crossway, a publishing ministry of Good News Publishers. Used by permission. All rights reserved.</span>
   </footer>
 </main>
 <div class="toast ui" id="toast" hidden><span id="toast-text"></span><button class="link" id="toast-undo" type="button">Undo</button></div>
@@ -296,11 +339,65 @@
     "Miscellaneous"      // uni applications, emailing teachers, other school admin
   ];
   const DAY = 24 * 60 * 60 * 1000;
+
+  // Verse of the day (ESV): hard work, diligence, using our gifts, doing everything for God's glory.
+  // A new one each day, the same for everyone; cycles through the list.
+  const VERSES = [
+    ["Colossians 3:23-24", "Whatever you do, work heartily, as for the Lord and not for men, knowing that from the Lord you will receive the inheritance as your reward. You are serving the Lord Christ."],
+    ["Colossians 3:17", "And whatever you do, in word or deed, do everything in the name of the Lord Jesus, giving thanks to God the Father through him."],
+    ["1 Corinthians 10:31", "So, whether you eat or drink, or whatever you do, do all to the glory of God."],
+    ["1 Corinthians 15:58", "Therefore, my beloved brothers, be steadfast, immovable, always abounding in the work of the Lord, knowing that in the Lord your labor is not in vain."],
+    ["Proverbs 14:23", "In all toil there is profit, but mere talk tends only to poverty."],
+    ["Proverbs 13:4", "The soul of the sluggard craves and gets nothing, while the soul of the diligent is richly supplied."],
+    ["Proverbs 12:24", "The hand of the diligent will rule, while the slothful will be put to forced labor."],
+    ["Proverbs 10:4", "A slack hand causes poverty, but the hand of the diligent makes rich."],
+    ["Proverbs 16:3", "Commit your work to the LORD, and your plans will be established."],
+    ["Proverbs 21:5", "The plans of the diligent lead surely to abundance, but everyone who is hasty comes only to poverty."],
+    ["Proverbs 22:29", "Do you see a man skillful in his work? He will stand before kings; he will not stand before obscure men."],
+    ["Proverbs 6:6-8", "Go to the ant, O sluggard; consider her ways, and be wise. Without having any chief, officer, or ruler, she prepares her bread in summer and gathers her food in harvest."],
+    ["Ecclesiastes 9:10", "Whatever your hand finds to do, do it with your might, for there is no work or thought or knowledge or wisdom in Sheol, to which you are going."],
+    ["1 Peter 4:10", "As each has received a gift, use it to serve one another, as good stewards of God's varied grace."],
+    ["Romans 12:11", "Do not be slothful in zeal, be fervent in spirit, serve the Lord."],
+    ["Galatians 6:9", "And let us not grow weary of doing good, for in due season we will reap, if we do not give up."],
+    ["2 Thessalonians 3:13", "As for you, brothers, do not grow weary in doing good."],
+    ["2 Timothy 2:15", "Do your best to present yourself to God as one approved, a worker who has no need to be ashamed, rightly handling the word of truth."],
+    ["Matthew 5:16", "In the same way, let your light shine before others, so that they may see your good works and give glory to your Father who is in heaven."],
+    ["Matthew 25:21", "His master said to him, 'Well done, good and faithful servant. You have been faithful over a little; I will set you over much. Enter into the joy of your master.'"],
+    ["Ephesians 2:10", "For we are his workmanship, created in Christ Jesus for good works, which God prepared beforehand, that we should walk in them."],
+    ["Philippians 4:13", "I can do all things through him who strengthens me."],
+    ["Hebrews 6:11-12", "And we desire each one of you to show the same earnestness to have the full assurance of hope until the end, so that you may not be sluggish, but imitators of those who through faith and patience inherit the promises."],
+    ["James 1:5", "If any of you lacks wisdom, let him ask God, who gives generously to all without reproach, and it will be given him."],
+    ["Proverbs 2:6", "For the LORD gives wisdom; from his mouth come knowledge and understanding."],
+    ["Psalm 90:17", "Let the favor of the Lord our God be upon us, and establish the work of our hands upon us; yes, establish the work of our hands!"],
+    ["Isaiah 40:31", "But they who wait for the LORD shall renew their strength; they shall mount up with wings like eagles; they shall run and not be weary; they shall walk and not faint."],
+    ["1 Timothy 4:12", "Let no one despise you for your youth, but set the believers an example in speech, in conduct, in love, in faith, in purity."],
+    ["Titus 2:7", "Show yourself in all respects to be a model of good works, and in your teaching show integrity, dignity."],
+    ["Proverbs 3:5-6", "Trust in the LORD with all your heart, and do not lean on your own understanding. In all your ways acknowledge him, and he will make straight your paths."],
+    ["Joshua 1:9", "Have I not commanded you? Be strong and courageous. Do not be frightened, and do not be dismayed, for the LORD your God is with you wherever you go."],
+    ["2 Chronicles 15:7", "But you, take courage! Do not let your hands be weak, for your work shall be rewarded."],
+    ["Philippians 3:14", "I press on toward the goal for the prize of the upward call of God in Christ Jesus."],
+    ["1 Corinthians 9:24", "Do you not know that in a race all the runners run, but only one receives the prize? So run that you may obtain it."],
+    ["Matthew 6:33", "But seek first the kingdom of God and his righteousness, and all these things will be added to you."],
+    ["Proverbs 18:9", "Whoever is slack in his work is a brother to him who destroys."],
+    ["2 Corinthians 9:8", "And God is able to make all grace abound to you, so that having all sufficiency in all things at all times, you may abound in every good work."],
+    ["Psalm 127:1", "Unless the LORD builds the house, those who build it labor in vain. Unless the LORD watches over the city, the watchman stays awake in vain."],
+    ["Luke 16:10", "One who is faithful in a very little is also faithful in much, and one who is dishonest in a very little is also dishonest in much."],
+    ["Ecclesiastes 11:6", "In the morning sow your seed, and at evening withhold not your hand, for you do not know which will prosper, this or that, or whether both alike will be good."],
+    ["Psalm 37:5", "Commit your way to the LORD; trust in him, and he will act."],
+    ["Isaiah 41:10", "Fear not, for I am with you; be not dismayed, for I am your God; I will strengthen you, I will help you, I will uphold you with my righteous right hand."],
+    ["Philippians 2:14", "Do all things without grumbling or disputing."],
+    ["Proverbs 20:4", "The sluggard does not plow in the autumn; he will seek at harvest and have nothing."],
+    ["Philippians 1:6", "And I am sure of this, that he who began a good work in you will bring it to completion at the day of Jesus Christ."],
+    ["2 Timothy 1:7", "For God gave us a spirit not of fear but of power and love and self-control."]
+  ];
   const REPO_API = "https://api.github.com/repos/SlMONSAYS/homework-updates/contents/";
   const LOCK_FILE = "login-lock.json";   // the GitHub key, locked with Simon's password
   // Handed-in items stay in the file as comment lines with the time they were checked off:
   //   # done 2026-10-22 15:45 | 2026-10-25 | Math 11 | Worksheet
   const DONE_RE = /^#\s*done(?:\s+(\d{4}-\d{2}-\d{2})\s+(\d{1,2}):(\d{2}))?\s*\|\s*/;
+  // Assignments planned for today are kept as "# today <date> | <assignment line>". Only today's
+  // date counts, so the list empties itself at midnight; older ones are tidied away on the next save.
+  const TODAY_RE = /^#\s*today\s+(\d{4}-\d{2}-\d{2})\s*\|\s*(.*)$/;
   const TOKEN_KEY = "homework-token";
 
   const $ = id => document.getElementById(id);
@@ -345,9 +442,15 @@
   }
 
   function parse(text) {
-    const items = [], done = [], bad = [];
+    const items = [], done = [], bad = [], planned = new Set();
+    const todayIso = isoDate(startOfToday());
     text.split(/\r?\n/).forEach((raw, i) => {
       const line = raw.trim();
+      const t = TODAY_RE.exec(line);
+      if (t) {
+        if (t[1] === todayIso) planned.add(t[2].trim());
+        return;
+      }
       const m = DONE_RE.exec(line);
       if (m) {
         const rest = line.slice(m[0].length);
@@ -362,8 +465,13 @@
       const it = parseItem(line);
       if (it) items.push(it); else bad.push({ n: i + 1, line });
     });
-    return { items, done, bad };
+    return { items, done, bad, planned };
   }
+
+  // An assignment's line without any "# done" prefix: how Today refers to it.
+  const keyOf = it => it.prefix ? it.rest : it.line;
+  const todayLine = key => "# today " + isoDate(startOfToday()) + " | " + key;
+  const isStaleToday = l => { const t = TODAY_RE.exec(l.trim()); return !!t && t[1] !== isoDate(startOfToday()); };
 
   function makeLine(due, cls, title, note = "", big = false) {
     const clean = s => s.replace(/\s+/g, " ").trim();
@@ -424,7 +532,7 @@
     let lines = base.text.split(/\r?\n/);
     if (lines.length && lines[lines.length - 1] === "") lines.pop();
     for (const op of ops) lines = op(lines);
-    return lines.join("\n") + "\n";
+    return lines.filter(l => !isStaleToday(l)).join("\n") + "\n";
   }
 
   function setStatus(s, isErr) {
@@ -502,18 +610,25 @@
   // ---------- Rendering ----------
   const editing = () => !!(token && base);
 
-  function itemRow(it, label) {
+  let plannedKeys = new Set();
+
+  function itemRow(it, label, opts = {}) {
     const li = el("li");
     const isDone = !!it.prefix;
+    const key = keyOf(it);
+    const planned = plannedKeys.has(key);
+    li.classList.toggle("is-done", isDone);
     const tag = el("span", "when", label(it));
+    if (opts.tagClass) { const c = opts.tagClass(it); if (c) tag.classList.add(c); }
     if (isDone && it.submitted && it.submitted > addDays(it.due, 1)) tag.classList.add("late");
     const main = el("div", "main");
     const title = el("span", "title");
     if (it.big) title.append(el("span", "big", "★ Big"));
     title.append(it.title);
+    if (opts.showClass) title.append(el("span", "cls-inline", " \u00b7 " + it.cls));
     main.append(title);
     if (it.note) main.append(el("span", "note-line", it.note));
-    if (isDone) main.append(el("span", "stamp", it.submitted ? fmtSubmitted(it.submitted) : "Submitted"));
+    if (isDone && !opts.inToday) main.append(el("span", "stamp", it.submitted ? fmtSubmitted(it.submitted) : "Submitted"));
     if (!editing()) {
       li.append(main, tag);
       return li;
@@ -540,10 +655,28 @@
     x.type = "button";
     x.setAttribute("aria-label", "Delete " + it.title);
     x.onclick = () => {
-      edit(replaceLine(it.line, null));
-      toast("Deleted: " + it.title, () => edit(addLine(it.line)));
+      // Deleting an assignment also takes it off today's list.
+      edit(ls => replaceLine(todayLine(key), null)(replaceLine(it.line, null)(ls)));
+      toast("Deleted: " + it.title, () => edit(ls => planned ? [...ls, it.line, todayLine(key)] : [...ls, it.line]));
     };
-    li.append(box, main, tag, x);
+    // ☼ adds an assignment to today's list; ☀ means it's on it (tap again to take it off).
+    if (!isDone || opts.inToday) {
+      const sun = el("button", "sun" + (planned ? " on" : ""), planned ? "\u2600\uFE0E" : "\u263C");
+      sun.type = "button";
+      sun.setAttribute("aria-label", (planned ? "Remove from today: " : "Add to today: ") + it.title);
+      sun.onclick = () => {
+        if (planned) {
+          edit(replaceLine(todayLine(key), null));
+          toast("Removed from today", () => edit(addLine(todayLine(key))));
+        } else {
+          edit(addLine(todayLine(key)));
+          toast("Added to today: " + it.title, () => edit(replaceLine(todayLine(key), null)));
+        }
+      };
+      li.append(box, main, tag, sun, x);
+    } else {
+      li.append(box, main, tag, x);
+    }
     return li;
   }
 
@@ -636,8 +769,12 @@
       if (!what.value.trim() || !when.value()) return;
       const line = (it.prefix || "") + makeLine(when.value(), cls.value, what.value, note.value, big.checked);
       if (line === it.line) { render(currentText()); return; }
-      edit(replaceLine(it.line, line));
-      toast("Saved changes", () => edit(replaceLine(line, it.line)));
+      // Keep it on today's list if it was there: the today line names the assignment, so update it too.
+      const oldKey = keyOf(it), newKey = line.slice((it.prefix || "").length);
+      const swap = (fromLine, toLine, fromKey, toKey) => ls =>
+        replaceLine(todayLine(fromKey), todayLine(toKey))(replaceLine(fromLine, toLine)(ls));
+      edit(swap(it.line, line, oldKey, newKey));
+      toast("Saved changes", () => edit(swap(line, it.line, newKey, oldKey)));
     };
     cancel.onclick = () => render(currentText());
     form.onkeydown = e => { if (e.key === "Escape") render(currentText()); };
@@ -728,7 +865,8 @@
     currentShownText = text;
     const today = startOfToday();
     const sunday = thisSunday();
-    const { items, done, bad } = parse(text);
+    const { items, done, bad, planned } = parse(text);
+    plannedKeys = planned;
     reveal();
     const ed = editing();
     document.body.classList.toggle("editing", ed);
@@ -737,12 +875,29 @@
     const week = items.filter(it => it.due >= today && it.due <= sunday);
     const later = items.filter(it => it.due > sunday);
 
-    renderList($("overdue"), overdue, it => lateLabel(Math.round((today - it.due) / DAY)), "Nothing overdue.");
-    renderList($("week"), week, it =>
-      +it.due === +today ? "Today" : +it.due === +addDays(today, 1) ? "Tomorrow" :
-        it.due.toLocaleDateString(undefined, { weekday: "short" }), "Nothing due this week.");
+    const overdueLabel = it => lateLabel(Math.round((today - it.due) / DAY));
+    const weekLabel = it => +it.due === +today ? "Today" : +it.due === +addDays(today, 1) ? "Tomorrow" :
+      it.due.toLocaleDateString(undefined, { weekday: "short" });
+    const laterLabel = it => +it.due === +addDays(sunday, 7) ? "Next week" : fmt(it.due);
+    renderList($("overdue"), overdue, overdueLabel, "Nothing overdue.");
+    renderList($("week"), week, weekLabel, "Nothing due this week.");
+    renderList($("upcoming"), later, laterLabel, "Nothing due later.");
 
-    renderList($("upcoming"), later, it => +it.due === +addDays(sunday, 7) ? "Next week" : fmt(it.due), "Nothing due later.");
+    // Today: whatever's been planned for today, still-to-do first, then what's already done.
+    const todays = [...items, ...done].filter(it => planned.has(keyOf(it)))
+      .sort((a, b) => (!!a.prefix - !!b.prefix) || a.due - b.due);
+    const todayDone = todays.filter(it => it.prefix).length;
+    const todayUl = el("ul");
+    for (const it of todays) {
+      todayUl.append(itemRow(it,
+        it => it.prefix ? "Done" : it.due < today ? overdueLabel(it) : it.due <= sunday ? weekLabel(it) : laterLabel(it),
+        { showClass: true, inToday: true, tagClass: it => it.prefix ? "done-tag" : it.due < today ? "late" : "" }));
+    }
+    $("today").replaceChildren(todays.length ? todayUl : el("p", "empty", ed
+      ? "Nothing planned yet. Tap \u263C on any assignment to add it to today."
+      : "Nothing planned for today yet."));
+    if (todays.length) $("today").append(el("p", "today-hint", "Clears itself at midnight."));
+    $("today-count").textContent = todays.length ? "· " + todayDone + " of " + todays.length + " done" : "";
     // Submitted log: everyone sees it, newest first within each class.
     renderList($("done"), done, it => {
       if (!it.submitted) return "Was due " + fmt(it.due);
@@ -759,10 +914,11 @@
     $("week-count").textContent = week.length ? "· " + week.length : "";
     $("upcoming-count").textContent = later.length ? "· " + later.length : "";
     $("summary").replaceChildren(
+      ...(todays.length ? [chip("today", todayDone + " of " + todays.length + " today", "today-card")] : []),
       chip("red", overdue.length + " overdue", "overdue-card"),
       chip("yellow", week.length + " due this week", "week-card"),
       chip("green", later.length + " later", "upcoming-card"),
-      chip("wood", thisWeek + " submitted this week", "done-card"));
+      chip("steel", thisWeek + " submitted this week", "done-card"));
     $("progress").replaceChildren("This week · ", el("b", null, String(thisWeek)), " submitted", "\u2003Last week · ",
       el("b", null, String(lastWeek)));
     if (ed) {
@@ -814,6 +970,15 @@
       $("add-title").focus();
     };
   }
+
+  // ---------- Verse of the day ----------
+  function showVerse() {
+    const t = startOfToday();
+    const dayNumber = Math.floor(Date.UTC(t.getFullYear(), t.getMonth(), t.getDate()) / DAY);
+    const [ref, text] = VERSES[dayNumber % VERSES.length];
+    $("verse").replaceChildren("\u201c" + text + "\u201d ", el("cite", null, "\u2014 " + ref + " (ESV)"));
+  }
+  showVerse();
 
   // ---------- Start ----------
   // Read the file straight from GitHub so changes show up instantly; the published copy
