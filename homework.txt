@@ -38,4 +38,3 @@
 # done 2026-10-22 21:21 | 2026-10-01 | Chemistry 11 | Separation Lab
 # done 2026-10-22 17:48 | 2026-10-01 | Chemistry 11 | Pre Atoms and Molecules Reflections
 # today 2026-10-29 | 2026-10-08 | Humanities 12 | Canvatoon Mini-Assignment
-# today 2026-10-29 | 2026-10-15 | Math 11 | Mid Chapter 2 Quiz
