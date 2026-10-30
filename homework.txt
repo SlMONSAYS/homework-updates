@@ -7,7 +7,7 @@
 # Delete a line when the work is handed in. Lines starting with # are ignored.
 # Items checked off on the website become '# done <date> <time> | ...' lines (the Submitted list).
 2026-10-25 | Humanities 12 | Take WSQ Notes On 12 Videos
-2026-10-08 | Humanities 12 | Canvatoon Mini-Assignment
+# done 2026-10-29 17:29 | 2026-10-08 | Humanities 12 | Canvatoon Mini-Assignment
 2026-11-01 | Humanities 12 | LARGE Assignment - Take RSQ Notes On Entirety Novel "Great Gatsby"
 2026-10-15 | Careers 12 | Do Quick Research On Worker's Unions - Email Findings to Mr. McKaig
 2026-11-16 | Miscellaneous | Start A Work Experience/Volunteer Log (30 Hours Mandatory For Graduation)
