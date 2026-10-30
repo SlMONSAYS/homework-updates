@@ -291,7 +291,7 @@
   <section class="card done" id="done-card">
     <h2>Submitted</h2>
     <p class="progress" id="progress"></p>
-    <p class="done-intro">Checked off as handed in, newest first.</p>
+    <p class="done-intro">Checked off as handed in, newest first, by day.</p>
     <div id="done"></div>
     <button class="link clear" id="clear-done" type="button" hidden>Clear the submitted list</button>
   </section>
@@ -628,7 +628,9 @@
     if (opts.showClass) title.append(el("span", "cls-inline", " \u00b7 " + it.cls));
     main.append(title);
     if (it.note) main.append(el("span", "note-line", it.note));
-    if (isDone && !opts.inToday) main.append(el("span", "stamp", it.submitted ? fmtSubmitted(it.submitted) : "Submitted"));
+    if (isDone && !opts.inToday) main.append(el("span", "stamp", !it.submitted ? "Submitted" : opts.timeOnly
+      ? "Submitted at " + it.submitted.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit", hour12: true })
+      : fmtSubmitted(it.submitted)));
     if (!editing()) {
       li.append(main, tag);
       return li;
@@ -786,7 +788,9 @@
   const PER_CLASS = 3;
   const expanded = new Set();
 
-  function renderList(container, items, label, emptyText = "Nothing", order = (a, b) => a.due - b.due) {
+  // Items are grouped by class by default; opts.groupBy can group them some other way (e.g. by day),
+  // in which case groups appear in the order of the sorted items. opts.row is passed to itemRow.
+  function renderList(container, items, label, emptyText = "Nothing", order = (a, b) => a.due - b.due, opts = {}) {
     container.replaceChildren();
     items.sort(order);
     const open = expanded.has(container.id);
@@ -796,16 +800,18 @@
       render(currentShownText);
     };
     // Only classes with something in this list get a heading, in class order; unknown class names go at the end.
+    const groupOf = opts.groupBy || (it => it.cls);
     const extra = [...new Set(items.map(it => it.cls).filter(c => !CLASSES.includes(c)))].sort();
-    for (const cls of [...CLASSES, ...extra]) {
-      const mine = items.filter(it => it.cls === cls);
+    const groups = opts.groupBy ? [...new Set(items.map(groupOf))] : [...CLASSES, ...extra];
+    for (const cls of groups) {
+      const mine = items.filter(it => groupOf(it) === cls);
       if (!mine.length) continue;
       container.append(el("h3", null, cls));
       const ul = el("ul");
       const clsKey = container.id + "|" + cls;
       const clsOpen = open || expanded.has(clsKey);
       const shown = clsOpen ? mine : mine.slice(0, PER_CLASS);
-      for (const it of shown) ul.append(itemRow(it, label));
+      for (const it of shown) ul.append(itemRow(it, label, opts.row));
       container.append(ul);
       if (mine.length > PER_CLASS) overflow = true;
       // Tap "Show N more" to open just this class; "Show less" closes it again.
@@ -898,12 +904,20 @@
       : "Nothing planned for today yet."));
     if (todays.length) $("today").append(el("p", "today-hint", "Clears itself at midnight."));
     $("today-count").textContent = todays.length ? "· " + todayDone + " of " + todays.length + " done" : "";
-    // Submitted log: everyone sees it, newest first within each class.
+    // Submitted log: everyone sees it, grouped by the day it was checked off, newest first.
+    // The day is the heading, so each row shows its class and just the time.
+    const dayName = it => {
+      if (!it.submitted) return "Earlier (no time recorded)";
+      const d = startOfDay(it.submitted);
+      return +d === +today ? "Today" : +d === +addDays(today, -1) ? "Yesterday" :
+        d.toLocaleDateString(undefined, { weekday: "long", month: "short", day: "numeric" });
+    };
     renderList($("done"), done, it => {
       if (!it.submitted) return "Was due " + fmt(it.due);
       const late = Math.round((startOfDay(it.submitted) - it.due) / DAY);
       return late <= 0 ? "On time" : lateLabel(late);
-    }, "Nothing submitted yet.", (a, b) => (b.submitted || 0) - (a.submitted || 0));
+    }, "Nothing submitted yet.", (a, b) => (b.submitted || 0) - (a.submitted || 0),
+    { groupBy: dayName, row: { showClass: true, timeOnly: true } });
     $("clear-done").hidden = !ed || !done.length;
 
     // Counts: card headings, the summary bar, and weekly progress (weeks start Monday).
