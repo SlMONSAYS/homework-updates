@@ -16,7 +16,7 @@
 2026-10-25 | Psychology 12 | Research Paper on a Psychologist
 2026-10-25 | Psychology 12 | The Ethics of Psychological Research
 2026-10-30 | Psychology 12 | Proctored Test #1 - Psychologists and Research Methods
-2026-10-15 | Math 11 | Mid Chapter 2 Quiz
+# done 2026-11-04 21:11 | 2026-10-15 | Math 11 | Mid Chapter 2 Quiz
 2026-10-25 | Math 11 | Section 2.4 Assignment
 2026-10-25 | Math 11 | Chapter 2 Test Multiple Choice
 2026-10-26 | Math 11 | Chapter 2 Test Written Response
@@ -37,13 +37,6 @@
 # done 2026-10-22 23:01 | 2026-10-08 | Anatomy and Physiology 12 | Katina's Bad Day
 # done 2026-10-22 21:21 | 2026-10-01 | Chemistry 11 | Separation Lab
 # done 2026-10-22 17:48 | 2026-10-01 | Chemistry 11 | Pre Atoms and Molecules Reflections
-# today 2026-10-29 | 2026-10-08 | Humanities 12 | Canvatoon Mini-Assignment
-# today 2026-10-29 | 2026-10-15 | Math 11 | Mid Chapter 2 Quiz
-# today 2026-10-29 | 2026-10-25 | Math 11 | Section 2.4 Assignment
-# today 2026-10-29 | 2026-10-25 | Math 11 | Chapter 2 Test Multiple Choice
-# today 2026-10-29 | 2026-10-26 | Math 11 | Chapter 2 Test Written Response
-# today 2026-10-29 | 2026-10-08 | Anatomy and Physiology 12 | The Parts of the Cell - Worksheet 5
-# today 2026-10-29 | 2026-10-15 | Psychology 12 | Psychologists and Research Methods
 2026-11-01 | Humanities 12 | Write an Epilogue For "Great Gatsby" // Peer editing next class
 2026-11-01 | Humanities 12 | Finalize Stalin Script/Research and Record Voiceover
 2026-11-02 | Psychology 12 | 2 Proctored Test #1 - Psychologists and Research Methods // STUDY BEFOREHAND
