@@ -37,7 +37,7 @@
 # done 2026-10-22 23:01 | 2026-10-08 | Anatomy and Physiology 12 | Katina's Bad Day
 # done 2026-10-22 21:21 | 2026-10-01 | Chemistry 11 | Separation Lab
 # done 2026-10-22 17:48 | 2026-10-01 | Chemistry 11 | Pre Atoms and Molecules Reflections
-2026-11-01 | Humanities 12 | Write an Epilogue For "Great Gatsby" // Peer editing next class
+# done 2026-11-10 07:21 | 2026-11-01 | Humanities 12 | Write an Epilogue For "Great Gatsby" // Peer editing next class
 # done 2026-11-09 13:55 | 2026-11-01 | Humanities 12 | Finalize Stalin Script/Research and Record Voiceover
 2026-11-02 | Psychology 12 | 2 Proctored Test #1 - Psychologists and Research Methods // STUDY BEFOREHAND
 2026-11-08 | Math 11 | Section 2.3 Assignment
