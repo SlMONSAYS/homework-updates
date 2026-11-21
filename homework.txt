@@ -8,7 +8,6 @@
 # Items checked off on the website become '# done <date> <time> | ...' lines (the Submitted list).
 # done 2026-11-07 22:23 | 2026-10-25 | Humanities 12 | Take WSQ Notes On 12 Videos
 # done 2026-11-08 01:08 | 2026-10-08 | Humanities 12 | Canvatoon Mini-Assignment
-2026-10-15 | Careers 12 | Do Quick Research On Worker's Unions - Email Findings to Mr. McKaig
 2026-11-16 | Miscellaneous | Start A Work Experience/Volunteer Log (30 Hours Mandatory For Graduation)
 2026-11-21 | Psychology 12 | Psychologists and Research Methods
 2026-11-21 | Psychology 12 | Research Paper on a Psychologist
